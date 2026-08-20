@@ -154,14 +154,20 @@ export default function AdminPanelPage() {
 
   if (user?.role !== 'ADMIN') {
     return (
-      <div className="max-w-md mx-auto p-12 text-center space-y-4">
-        <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+      <div className="max-w-md mx-auto p-12 text-center space-y-4 my-12">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
           <ShieldCheck className="w-6 h-6" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Admin Privileges Required</h2>
+        <h2 className="text-xl font-bold text-slate-900">Access Restricted</h2>
         <p className="text-xs text-slate-500">
-          You can test the moderator workflow by switching to the Admin persona using the top navigation role switcher.
+          This portal is restricted to authorized platform administrators only.
         </p>
+        <Link
+          href="/"
+          className="inline-block px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors shadow-sm"
+        >
+          Return to Homepage
+        </Link>
       </div>
     );
   }

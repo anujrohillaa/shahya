@@ -113,7 +113,7 @@ export default function Footer() {
           <div className="flex items-center gap-4 text-xs">
             <Link href="/explore" className="hover:text-slate-400">Explore</Link>
             <Link href="/post" className="hover:text-slate-400">Post Listing</Link>
-            <Link href="/admin" className="hover:text-amber-400">Admin</Link>
+            <Link href="/messages" className="hover:text-slate-400">Messages</Link>
           </div>
         </div>
 
