@@ -35,6 +35,7 @@ import ReportModal from '@/components/ReportModal';
 import ShareModal from '@/components/ShareModal';
 import SafetyBanner from '@/components/SafetyBanner';
 import { calculateMatchScore } from '@/lib/matching';
+import JsonLd from '@/components/JsonLd';
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -180,8 +181,31 @@ export default function ListingDetailPage() {
     }).format(amt);
   };
 
+  const listingSchema = listing ? {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: listing.title,
+    description: listing.description || `Verified room for rent in ${listing.locality}, ${listing.city}. Zero brokerage on Shahya.`,
+    url: `https://shahya.com/listing/${listing.id}`,
+    image: listing.photos && listing.photos.length > 0 ? listing.photos.map(p => p.url) : ['https://shahya.com/icon.png'],
+    offers: {
+      '@type': 'Offer',
+      price: listing.rent,
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      businessFunction: 'https://schema.org/LeaseOut'
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: listing.locality,
+      addressRegion: listing.city,
+      addressCountry: 'IN'
+    }
+  } : null;
+
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8 pb-28 sm:pb-16 min-h-[calc(100dvh-4rem)]">
+      {listingSchema && <JsonLd data={listingSchema} />}
       
       {/* Top Breadcrumb & Actions */}
       <div className="flex items-center justify-between">

@@ -17,6 +17,8 @@ import ListingCard from '@/components/ListingCard';
 import { ListingGridSkeleton } from '@/components/ui/CustomLoader';
 import { ListingItem } from '@/lib/types';
 
+import JsonLd, { getFaqSchema } from '@/components/JsonLd';
+
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
@@ -26,9 +28,10 @@ export default function HomePage() {
 
   const cities = [
     { name: 'Gurgaon', count: '480+ places', image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format&fit=crop&q=80' },
-    { name: 'Bangalore', count: '650+ places', image: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=600&auto=format&fit=crop&q=80' },
+    { name: 'Manesar', count: '190+ places', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&fit=crop&q=80' },
     { name: 'Delhi', count: '410+ places', image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&auto=format&fit=crop&q=80' },
     { name: 'Noida', count: '290+ places', image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&auto=format&fit=crop&q=80' },
+    { name: 'Bangalore', count: '650+ places', image: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=600&auto=format&fit=crop&q=80' },
     { name: 'Pune', count: '320+ places', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&fit=crop&q=80' },
   ];
 
@@ -57,8 +60,24 @@ export default function HomePage() {
     router.push(`/explore?${params.toString()}`);
   };
 
+  const homepageFaqs = [
+    {
+      question: "Is Shahya really 100% free with zero brokerage?",
+      answer: "Yes, Shahya is completely free. We do not charge broker commissions, and we never lock owner or flatmate contacts behind paid paywalls."
+    },
+    {
+      question: "How do I find flatmates in Manesar, Gurgaon, or Delhi?",
+      answer: "You can use Shahya's city hubs or search bar to browse verified rooms and flatmate seeker profiles in IMT Manesar, Cyber City, DLF Phase 1-5, Sector 56, Saket, and Delhi NCR. Filter by lifestyle preferences and chat directly for free."
+    },
+    {
+      question: "Can I post a room or flatmate seeker request on Shahya?",
+      answer: "Yes, anyone with a vacant room or anyone looking for a flatmate can post a listing in under 2 minutes with interactive 16:9 photo cropping and instant live publishing."
+    }
+  ];
+
   return (
-    <div className="space-y-10 sm:space-y-20 pb-16 min-h-[calc(100dvh-4rem)] flex flex-col justify-between">
+    <div className="space-y-12 sm:space-y-20 pb-16 min-h-[calc(100dvh-4rem)] flex flex-col justify-between">
+      <JsonLd data={getFaqSchema(homepageFaqs)} />
       
       {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/80 via-white to-[#f8fafc] pt-6 pb-10 sm:pt-16 sm:pb-20 border-b border-slate-100">
