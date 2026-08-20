@@ -105,6 +105,9 @@ export default function PrivacyPage() {
             <p>
               For any questions, grievances, or privacy inquiries, contact our Privacy & Support Team directly on WhatsApp at <strong>+91 9817283155</strong> or submit an inquiry on our <Link href="/contact" className="text-brand-600 underline font-semibold">Contact Page</Link>.
             </p>
+            <p className="text-xs text-slate-500 pt-1">
+              <strong>Registered Office:</strong> Dhigana, Jind, Haryana - 126114, India.
+            </p>
           </section>
 
         </div>

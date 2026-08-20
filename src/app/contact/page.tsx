@@ -93,15 +93,17 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Coverage Areas */}
+            {/* Registered Address */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-3.5">
-              <div className="p-2.5 rounded-xl bg-brand-50 text-brand-600 border border-brand-100 flex-shrink-0">
+              <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex-shrink-0">
                 <MapPin className="w-4 h-4" />
               </div>
               <div className="space-y-0.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Locations Covered</span>
-                <p className="text-xs sm:text-sm font-bold text-slate-900">Manesar, Gurgaon, Delhi NCR & Metros</p>
-                <p className="text-[11px] text-slate-500">Zero brokerage network</p>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Registered Office</span>
+                <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                  Dhigana, Jind, Haryana - 126114
+                </p>
+                <p className="text-[11px] text-slate-500">India</p>
               </div>
             </div>
           </div>

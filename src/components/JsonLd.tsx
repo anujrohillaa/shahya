@@ -20,6 +20,22 @@ export const getOrganizationSchema = (baseUrl = 'https://shahya.com') => ({
   name: 'Shahya',
   url: baseUrl,
   logo: `${baseUrl}/icon.png`,
+  telephone: '+91-9817283155',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+91-9817283155',
+    contactType: 'customer support',
+    areaServed: 'IN',
+    availableLanguage: ['en', 'hi'],
+  },
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Dhigana',
+    addressLocality: 'Jind',
+    addressRegion: 'Haryana',
+    postalCode: '126114',
+    addressCountry: 'IN',
+  },
   description: 'India\'s Direct Zero-Brokerage Flatmate & Room Finder Network.',
   sameAs: [
     'https://twitter.com/shahya_app',

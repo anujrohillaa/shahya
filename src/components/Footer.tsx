@@ -147,11 +147,16 @@ export default function Footer() {
 
         </div>
 
-        {/* Bottom Bar: Copyright & Compliance */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} Shahya.com — India's Free Flatmate Network. All rights reserved.</p>
+        {/* Bottom Bar: Copyright, Registered Address & Compliance */}
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4 pt-2 border-t border-slate-900">
+          <div className="space-y-1 text-center sm:text-left">
+            <p>© {new Date().getFullYear()} Shahya.com — India's Free Flatmate Network. All rights reserved.</p>
+            <p className="text-[11px] text-slate-400">
+              📍 Registered Office: Dhigana, Jind, Haryana - 126114, India
+            </p>
+          </div>
           
-          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs text-slate-400">
             <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
             <span>•</span>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
