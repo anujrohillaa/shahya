@@ -1,0 +1,212 @@
+// Prisma schema for FlatMate
+// Designed for PostgreSQL (with SQLite compatibility for fast local dev)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String         @id @default(cuid())
+  email           String?        @unique
+  phone           String?        @unique
+  name            String
+  passwordHash    String?
+  avatar          String?
+  age             Int?
+  gender          String?        // MALE, FEMALE, NON_BINARY, OTHER
+  occupation      String?        // STUDENT, WORKING_PROFESSIONAL, SELF_EMPLOYED, OTHER
+  companyCollege  String?
+  bio             String?
+  isPhoneVerified Boolean        @default(true)
+  isEmailVerified Boolean        @default(false)
+  isIdVerified    Boolean        @default(false)
+  role            String         @default("USER") // USER, ADMIN
+  status          String         @default("ACTIVE") // ACTIVE, SUSPENDED, BANNED
+  
+  // Lifestyle Preferences
+  smoking         String?        // NO, OCCASIONALLY, YES, DONT_MIND
+  drinking        String?        // NO, OCCASIONALLY, YES, DONT_MIND
+  foodPreference  String?        // VEG, NON_VEG, BOTH
+  sleepSchedule   String?        // EARLY, LATE, FLEXIBLE
+  cleanliness     String?        // VERY_IMPORTANT, NORMAL, FLEXIBLE
+  pets            String?        // HAVE_PETS, OKAY_WITH_PETS, NOT_OKAY
+  genderPreference String?       // MALE, FEMALE, ANY
+
+  listings        Listing[]
+  savedListings   SavedListing[]
+  messagesSent    Message[]      @relation("SentMessages")
+  conversationsAsUser1 Conversation[] @relation("User1")
+  conversationsAsUser2 Conversation[] @relation("User2")
+  reportsCreated  Report[]       @relation("Reporter")
+  reportsReceived Report[]       @relation("ReportedUser")
+  blockedUsers    BlockedUser[]  @relation("Blocker")
+  blockedBy       BlockedUser[]  @relation("Blocked")
+  notifications   Notification[]
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Listing {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String         // HAVE_PLACE, NEED_PLACE
+  title           String
+  description     String
+  
+  // Property & Room Specs
+  propertyType    String?        // APARTMENT, INDEPENDENT_HOUSE, BUILDER_FLOOR, PG, HOSTEL, OTHER
+  roomType        String?        // PRIVATE_ROOM, SHARED_ROOM, ENTIRE_PROPERTY, PG
+  bedrooms        Int?
+  bathrooms       Int?
+  currentLiving   Int?
+  vacancies       Int?           @default(1)
+  
+  // Pricing
+  rent            Int            // Monthly rent in INR (or max budget if NEED_PLACE)
+  minBudget       Int?           // For NEED_PLACE
+  maxBudget       Int?           // For NEED_PLACE
+  securityDeposit Int?           @default(0)
+  utilityEstimate Int?           @default(0)
+  brokerage       Int            @default(0) // 0 = No Brokerage
+  
+  // Location
+  city            String
+  locality        String
+  landmark        String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  
+  // Availability & Rules
+  availableFrom   DateTime?
+  moveInImmediate Boolean        @default(false)
+  minimumStay     String?        // 1_MONTH, 3_MONTHS, 6_MONTHS, FLEXIBLE
+  preferredGender String?        // MALE, FEMALE, ANY
+  preferredTenant String?        // STUDENT, PROFESSIONAL, ANY
+  
+  // Lifecycle & Status
+  status          String         @default("ACTIVE") // DRAFT, ACTIVE, PAUSED, CLOSED, EXPIRED
+  viewsCount      Int            @default(0)
+  expiresAt       DateTime?
+  
+  photos          ListingPhoto[]
+  amenities       ListingAmenity[]
+  preferences     ListingPreference[]
+  conversations   Conversation[]
+  savedBy         SavedListing[]
+  reports         Report[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model ListingPhoto {
+  id          String   @id @default(cuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url         String
+  isCover     Boolean  @default(false)
+  order       Int      @default(0)
+}
+
+model ListingAmenity {
+  id          String   @id @default(cuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name        String   // WIFI, AC, WASHING_MACHINE, REFRIGERATOR, TV, KITCHEN, PARKING, GYM, GATED_SOCIETY, POWER_BACKUP, BALCONY
+}
+
+model ListingPreference {
+  id          String   @id @default(cuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tag         String   // NON_SMOKER, VEGETARIAN, PET_FRIENDLY, WORKING_PROFESSIONAL, CLEAN
+}
+
+model Conversation {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user1Id         String
+  user1           User      @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2Id         String
+  user2           User      @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
+  lastMessageText String?
+  lastMessageAt   DateTime  @default(now())
+  
+  messages        Message[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([listingId, user1Id, user2Id])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  text           String
+  imageUrl       String?
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+model SavedListing {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+}
+
+model Report {
+  id             String   @id @default(cuid())
+  reporterId     String
+  reporter       User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  listingId      String?
+  listing        Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  reportedUserId String?
+  reportedUser   User?    @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  reason         String   // SCAM, FAKE_PROPERTY, ALREADY_RENTED, INAPPROPRIATE, HARASSMENT, OTHER
+  description    String?
+  status         String   @default("NEW") // NEW, UNDER_REVIEW, ACTION_TAKEN, RESOLVED
+  adminNotes     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model BlockedUser {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String?
+  type      String   // MESSAGE, LISTING_INQUIRY, EXPIRY_WARNING, SYSTEM
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

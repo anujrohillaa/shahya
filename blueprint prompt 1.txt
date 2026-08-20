@@ -1,0 +1,1175 @@
+Below is a **complete V1 blueprint** for your free Flatmate-style website. The goal is to launch something focused, useful, and scalable to an Android app later.
+
+# 1. Define the platform clearly
+
+The platform should primarily solve:
+
+### A. I have a place
+
+> I have a room/flat and need a flatmate.
+
+### B. I need a place
+
+> I am looking for a room/flat/flatmate.
+
+Initially, **do not try to become NoBroker + Housing + PG + hotel booking all at once**.
+
+Your core positioning:
+
+> **Find rooms, flatmates and shared accommodation for free. Chat directly. No contact unlock charges.**
+
+---
+
+# 2. User types
+
+Keep only **one User table**. Don't create separate account systems.
+
+A user can have multiple roles:
+
+* Looking for accommodation
+* Have accommodation
+* Both
+
+For example, someone may have a 3BHK with one vacant room while also looking to move somewhere else.
+
+---
+
+# 3. User registration fields
+
+Keep registration simple.
+
+## Required
+
+* Full name
+* Mobile number
+* OTP verification
+* Email
+* Password, if not using OTP-only authentication
+
+Better login options:
+
+* Continue with Google
+* Continue with mobile number
+
+Do **not** ask for 20 profile fields during signup.
+
+---
+
+# 4. User profile fields
+
+After registration, let users complete their profile.
+
+## Basic information
+
+* Profile photo
+* Full name
+* Age
+* Gender
+* Occupation
+
+  * Student
+  * Working professional
+  * Self-employed
+  * Other
+* Company/college — optional
+* About me
+
+Example:
+
+> Software developer working in Gurgaon. Looking for a clean and peaceful flatmate.
+
+---
+
+## Lifestyle preferences
+
+These are important for flatmate matching:
+
+* Smoking
+
+  * Yes
+  * No
+  * Occasionally
+  * Don't mind
+
+* Drinking
+
+  * Yes
+  * No
+  * Occasionally
+  * Don't mind
+
+* Food preference
+
+  * Vegetarian
+  * Non-vegetarian
+  * Both
+
+* Sleep schedule
+
+  * Early sleeper
+  * Late sleeper
+  * Flexible
+
+* Cleanliness
+
+  * Very important
+  * Normal
+  * Flexible
+
+* Pets
+
+  * Have pets
+  * Okay with pets
+  * Not okay with pets
+
+* Gender preference for flatmate
+
+  * Male
+  * Female
+  * Any
+
+Not all fields should be mandatory.
+
+---
+
+# 5. Post/listing types
+
+Your main `listings` table can support multiple types.
+
+## V1 listing types
+
+### 1. Room Available
+
+> I have a vacant room and need a flatmate.
+
+### 2. Flat Available
+
+> I have an entire flat/property available for sharing or renting.
+
+### 3. Looking for Room
+
+> I need a room/shared accommodation.
+
+### 4. Looking for Flatmate
+
+This can overlap with Room Available, so technically you can combine these.
+
+My recommendation for UI:
+
+### When clicking **Post**
+
+Ask:
+
+**What are you looking to do?**
+
+🏠 **I have a room/place**
+Find a flatmate or tenant.
+
+🔍 **I'm looking for a place**
+Find a room, flat or flatmate.
+
+This keeps the system simple.
+
+---
+
+# 6. "I Have a Place" listing fields
+
+## Basic details
+
+* Listing title
+
+Example:
+
+> Private room available in 3BHK near Cyber City
+
+* Property type
+
+  * Apartment
+  * Independent house
+  * Builder floor
+  * PG
+  * Hostel
+  * Other
+
+* Room type
+
+  * Private room
+  * Shared room
+  * Entire property
+
+* Number of bedrooms
+
+* Number of bathrooms
+
+* Total people currently living
+
+* Number of vacant spots/rooms
+
+---
+
+## Rent information
+
+* Monthly rent
+* Security deposit
+* Brokerage
+
+  * Default should display **No brokerage**, if your platform positioning supports it
+* Estimated electricity/water charges
+* Other monthly charges
+
+Example display:
+
+```text
+Rent: ₹12,000/month
+Security: ₹24,000
+Utilities: Approx ₹1,500/month
+```
+
+---
+
+## Location
+
+Do not store only free-text location.
+
+Fields:
+
+* Country
+* State
+* City
+* Locality/area
+* Address
+* Landmark
+* Latitude
+* Longitude
+
+For public display, you can show an **approximate location** instead of the exact flat address.
+
+This is better for privacy.
+
+---
+
+## Availability
+
+* Available from
+* Minimum stay
+
+  * 1 month
+  * 3 months
+  * 6 months
+  * Flexible
+* Listing status
+
+  * Available
+  * Reserved
+  * Closed
+
+---
+
+## Preferences for the person
+
+* Preferred gender
+* Age range — optional
+* Student/working professional
+* Smoking preference
+* Drinking preference
+* Food preference
+* Pets allowed
+* Other requirements
+
+---
+
+## Property amenities
+
+Use checkboxes:
+
+* Wi-Fi
+* AC
+* Washing machine
+* Refrigerator
+* TV
+* Kitchen
+* Gas/stove
+* Parking
+* Balcony
+* Lift
+* Power backup
+* Gated society
+* Security
+* Gym
+* Swimming pool
+
+---
+
+## Photos
+
+* Minimum: 3 recommended
+* Maximum: 10–15
+* Cover photo
+* Drag to reorder
+
+Optional:
+
+* Video tour
+
+Do not make users upload too much before publishing.
+
+---
+
+# 7. "I'm Looking for a Place" post fields
+
+This should be much simpler.
+
+## Basic
+
+* Title
+
+Example:
+
+> Looking for a private room near Udyog Vihar
+
+* Preferred location(s)
+* Move-in date
+* Flexible move-in date toggle
+
+---
+
+## Budget
+
+* Minimum budget
+* Maximum budget
+
+Example:
+
+₹8,000 – ₹15,000
+
+---
+
+## Accommodation type
+
+Allow multiple selection:
+
+* Private room
+* Shared room
+* PG
+* Entire flat
+* Hostel
+
+---
+
+## Personal details
+
+Pull from profile automatically:
+
+* Gender
+* Age
+* Occupation
+
+Allow them to choose what is publicly visible.
+
+---
+
+## Preferences
+
+* Preferred flatmate gender
+* Smoking
+* Drinking
+* Food preference
+* Pets
+* Other requirements
+
+---
+
+# 8. Home page
+
+Your homepage should immediately explain the product.
+
+## Hero section
+
+### Heading
+
+> Find Your Room, Home or Flatmate — Completely Free.
+
+Subtext:
+
+> Browse real listings, connect with people and chat directly. No contact unlock fees.
+
+### Main actions
+
+**🔍 Find a Place**
+
+**🏠 Find a Flatmate**
+
+**➕ Post a Listing**
+
+---
+
+## Below hero
+
+### Browse by location
+
+Initially:
+
+* Gurgaon
+* Delhi
+* Noida
+* Bangalore
+* Pune
+
+But only actively promote locations where you have listings.
+
+### Recent listings
+
+Show:
+
+* Image
+* Rent/budget
+* Area
+* Listing type
+* Available date
+* Basic user info
+
+### How it works
+
+```text
+1. Create your profile
+        ↓
+2. Post or discover listings
+        ↓
+3. Find a suitable match
+        ↓
+4. Chat directly
+        ↓
+5. Find your new home/flatmate
+```
+
+---
+
+# 9. Explore/search page
+
+This is one of the most important pages.
+
+## Search bar
+
+```text
+Search city, locality or area
+```
+
+Examples:
+
+* Gurgaon
+* Sector 21
+* Cyber City
+* Udyog Vihar
+* Manesar
+
+---
+
+## Filters
+
+### Location
+
+* City
+* Locality
+* Radius
+
+### Budget
+
+Min → Max
+
+### Listing type
+
+* Room available
+* Looking for room
+* Flatmate needed
+
+### Gender
+
+* Male
+* Female
+* Any
+
+### Move-in date
+
+### Occupation
+
+* Student
+* Professional
+* Any
+
+### Room type
+
+* Private
+* Shared
+* Entire
+
+### Amenities
+
+Optional advanced filter.
+
+---
+
+## Sorting
+
+* Newest
+* Rent low to high
+* Rent high to low
+* Recently updated
+
+---
+
+# 10. Listing detail page
+
+Example:
+
+```text
+[PHOTO GALLERY]
+
+Private Room Available in 3BHK
+Sector 43, Gurgaon
+
+₹15,000/month
+
+Available from: 1 September
+
+[ Chat Now ]
+
+----------------------------
+
+About this place
+Full description...
+
+Property details
+• Private Room
+• 3BHK
+• 2 people currently living
+
+Amenities
+Wi-Fi • AC • Kitchen • Washing Machine
+
+Preferences
+Male working professional preferred
+
+Posted by
+[Profile Photo]
+Rahul, 25
+Software Engineer
+
+[View Profile] [Chat]
+
+Report Listing
+```
+
+Important buttons:
+
+* ❤️ Save
+* 💬 Chat
+* 🚩 Report
+
+Do not show the phone number publicly by default.
+
+---
+
+# 11. Chat system
+
+Since you want chat, make this a major feature.
+
+## Chat flow
+
+User clicks:
+
+**Chat with Rahul**
+
+If not logged in:
+
+> Sign in to start a conversation.
+
+After login:
+
+```text
+Hi, is this room still available?
+```
+
+---
+
+## Chat features for V1
+
+* Real-time messages
+* Text messages
+* Image sharing
+* Listing attached automatically to conversation
+* Unread count
+* Conversation list
+* Block user
+* Report conversation
+* Delete conversation from own inbox
+
+---
+
+## Important safety rule
+
+When a chat starts, show:
+
+> Never send money before verifying the property and person.
+
+This is important because housing scams can otherwise damage your platform's reputation.
+
+---
+
+# 12. User profile page
+
+Public profile:
+
+* Profile photo
+* First name
+* Age
+* Occupation
+* Verification badges
+* About
+* Lifestyle preferences
+* Active listings
+* Member since
+
+Do **not** publicly show:
+
+* Phone number
+* Email
+* Exact home address
+
+---
+
+# 13. My Account section
+
+Logged-in user dashboard:
+
+## My Listings
+
+Tabs:
+
+* Active
+* Draft
+* Closed
+* Expired
+
+Actions:
+
+* Edit
+* Pause
+* Mark as found
+* Delete
+* Renew
+
+---
+
+## Saved listings
+
+Users can save properties/profiles.
+
+---
+
+## My Chats
+
+All conversations.
+
+---
+
+## Notifications
+
+Examples:
+
+* Someone sent you a message
+* Your listing received interest
+* Your listing expires in 3 days
+* A saved listing was updated
+
+---
+
+# 14. Notifications
+
+For the website:
+
+* In-app notifications
+* Browser notifications later
+* Email notifications
+
+Later, Android push notifications.
+
+Examples:
+
+> Rahul sent you a message regarding your room listing.
+
+> Your listing will expire tomorrow. Renew it to continue receiving responses.
+
+---
+
+# 15. Listing lifecycle
+
+This is extremely important to prevent dead listings.
+
+Suggested system:
+
+```text
+Draft
+ ↓
+Published
+ ↓
+Active
+ ↓
+Expiring Soon
+ ↓
+Expired
+```
+
+Ask after 25–30 days:
+
+> Is this listing still available?
+
+Buttons:
+
+**Yes, keep active**
+**No, mark as closed**
+
+If no response, automatically expire it.
+
+---
+
+# 16. Trust and verification system
+
+Do not force expensive verification initially.
+
+## Level 1 — Phone verified
+
+Automatically after OTP.
+
+Badge:
+
+📱 Phone Verified
+
+## Level 2 — Google/email verified
+
+Optional additional trust.
+
+## Level 3 — ID verified
+
+Later.
+
+Badge:
+
+✓ ID Verified
+
+Do not immediately display government ID information publicly.
+
+---
+
+# 17. Reporting system
+
+Users should be able to report:
+
+### Listing
+
+Reasons:
+
+* Fake property
+* Already rented
+* Incorrect information
+* Scam
+* Duplicate listing
+* Inappropriate content
+* Other
+
+### User
+
+* Fake profile
+* Scam/fraud
+* Harassment
+* Inappropriate behaviour
+* Spam
+
+### Chat message
+
+Allow reporting individual conversations or messages.
+
+---
+
+# 18. Admin panel
+
+You absolutely need this from Version 1.
+
+## Dashboard
+
+Show:
+
+* Total users
+* New users today
+* Active listings
+* New listings
+* Open reports
+* Active chats
+* Blocked users
+
+---
+
+## User management
+
+Admin can:
+
+* Search users
+* View profile
+* View listings
+* Suspend
+* Ban
+* Verify
+* Remove verification
+
+---
+
+## Listing management
+
+* View all listings
+* Approve/reject if moderation is enabled
+* Remove fake listings
+* Mark expired
+* See reports
+* Detect duplicates
+
+---
+
+## Report management
+
+Workflow:
+
+```text
+New
+↓
+Under Review
+↓
+Action Taken
+↓
+Resolved
+```
+
+Admin actions:
+
+* Ignore
+* Warn user
+* Remove listing
+* Suspend user
+* Permanently ban
+
+---
+
+# 19. Recommended database structure
+
+At a high level:
+
+```text
+users
+user_profiles
+user_preferences
+
+listings
+listing_photos
+listing_locations
+listing_amenities
+listing_preferences
+
+conversations
+conversation_participants
+messages
+message_attachments
+
+saved_listings
+notifications
+
+reports
+blocked_users
+
+verification_requests
+
+cities
+localities
+```
+
+### Important principle
+
+Do not create separate tables like:
+
+```text
+room_seekers
+flat_seekers
+property_owners
+flatmate_users
+```
+
+Use one `users` table and connect users to listings/profiles.
+
+---
+
+# 20. Listing table important fields
+
+Conceptually:
+
+```text
+id
+user_id
+
+listing_type
+title
+description
+
+property_type
+room_type
+
+rent
+security_deposit
+utility_cost
+
+available_from
+minimum_stay
+
+country
+state
+city
+locality
+address
+latitude
+longitude
+
+status
+
+created_at
+updated_at
+expires_at
+```
+
+Then store variable things separately:
+
+```text
+listing_photos
+listing_amenities
+listing_preferences
+```
+
+This will be easier to scale.
+
+---
+
+# 21. Matching system — don't build AI initially
+
+You can create a simple matching score.
+
+Example:
+
+```text
+Location match     40%
+Budget match       25%
+Move-in date       15%
+Gender preference  10%
+Lifestyle          10%
+```
+
+Then display:
+
+> **85% Match**
+
+Later you can improve it with smarter recommendations.
+
+For V1, normal database filtering is enough.
+
+---
+
+# 22. Ads strategy
+
+Since your platform will remain free:
+
+## Google Ads
+
+Potential locations:
+
+### Desktop
+
+* Between listing cards
+* Bottom of listing page
+* Sidebar
+
+### Mobile
+
+* Between results
+* Bottom sections
+
+### Never place ads:
+
+* Inside chat messages
+* Directly over important buttons
+* In a way that causes accidental clicks
+
+Initially, I would focus on **getting real users before aggressively optimizing ad revenue**. Low traffic usually means very little ad revenue.
+
+---
+
+# 23. SEO strategy
+
+Your website has a major advantage over an Android-only launch.
+
+Create location pages such as:
+
+```text
+/flatmates/gurgaon
+/flatmates/delhi
+/flatmates/noida
+
+/rooms/gurgaon
+/rooms/manesar
+/rooms/cyber-city
+```
+
+Individual listings:
+
+```text
+/listing/private-room-sector-43-gurgaon-12345
+```
+
+These pages can eventually bring organic traffic.
+
+---
+
+# 24. Recommended navigation
+
+## Desktop
+
+```text
+Logo
+
+Explore
+Find a Room
+Find a Flatmate
+
+Post Listing
+
+Saved
+Messages
+Profile
+```
+
+## Mobile responsive
+
+Bottom navigation:
+
+```text
+Home | Explore | Post | Chats | Profile
+```
+
+The website should be designed **mobile-first**, because many users will discover and use it from their phones.
+
+---
+
+# 25. V1 features you should build
+
+## Must have
+
+* [x] Google/mobile authentication
+* [x] User profile
+* [x] Phone verification
+* [x] Create listing
+* [x] Upload photos
+* [x] Search
+* [x] Filters
+* [x] Listing details
+* [x] Save listing
+* [x] Real-time chat
+* [x] Block user
+* [x] Report user/listing
+* [x] My listings
+* [x] Listing expiry
+* [x] Admin panel
+* [x] Basic notifications
+* [x] Mobile responsive UI
+
+---
+
+# 26. Do NOT build initially
+
+Avoid wasting time on:
+
+* AI matching
+* Video calling
+* Payment gateway
+* Android app
+* iOS app
+* ID verification automation
+* Complex recommendation engine
+* Maps with advanced route calculation
+* PG management
+* Broker management
+* Furniture marketplace
+* Packers and movers marketplace
+* Premium subscriptions
+
+First make this loop work:
+
+> **User posts → another user discovers → they chat → they successfully find a room or flatmate.**
+
+---
+
+# 27. Suggested development order
+
+### Phase 1 — Foundation
+
+* Database
+* Authentication
+* User profiles
+* Location structure
+* Admin authentication
+
+### Phase 2 — Core marketplace
+
+* Create listing
+* Photo upload
+* Listing management
+* Explore/search
+* Filters
+* Listing detail page
+
+### Phase 3 — Interaction
+
+* Save listings
+* Chat
+* Notifications
+* Block/report
+
+### Phase 4 — Moderation
+
+* Admin panel
+* Report review
+* User suspension
+* Listing moderation
+* Auto-expiry
+
+### Phase 5 — Growth
+
+* SEO pages
+* Share listing
+* Referral system
+* Google Ads
+* Analytics
+
+### Phase 6 — Android
+
+Once the website has real users and activity:
+
+> **Reuse the same backend API + database for the Android app.**
+
+---
+
+## My strongest recommendation
+
+Keep the first version focused around just **three things**:
+
+### 🏠 Find a Place
+
+### 👥 Find a Flatmate
+
+### 💬 Chat for Free
+
+Everything else should support these three actions.
+
+A good next step would be to define the **exact page-by-page UI and user flow**, starting from the landing page → signup → profile → create listing → explore → listing detail → chat → admin panel.

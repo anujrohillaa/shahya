@@ -1,0 +1,816 @@
+Yes. The **next step is to convert the idea into an exact product specification** before writing code.
+
+## 1. Complete user flow
+
+Your main flow should be:
+
+```text
+LANDING PAGE
+     ↓
+User selects what they want
+     ↓
+┌─────────────────┬──────────────────┐
+│ Find a Place    │ Find a Flatmate  │
+└─────────────────┴──────────────────┘
+     ↓
+Explore Listings / Create Profile
+     ↓
+View Listing
+     ↓
+Login required to Chat
+     ↓
+Start Conversation
+     ↓
+Find Match
+     ↓
+Mark Listing as Closed
+```
+
+The most important thing is: **a visitor should be able to browse without creating an account**.
+
+Only require login when they:
+
+* Post a listing
+* Chat with someone
+* Save a listing
+* Report a user
+
+This reduces friction.
+
+---
+
+# 2. Exact website pages
+
+I recommend these pages for V1.
+
+## Public pages
+
+### 1. Home
+
+`/`
+
+Purpose: Explain the platform and immediately let users search.
+
+Sections:
+
+```text
+──────────────────────────────────
+LOGO
+
+Explore     How it Works      Post Listing
+
+Login       [Post for Free]
+──────────────────────────────────
+
+Find Your Next Room or Flatmate
+
+[ Search location................ ]
+
+[ Find a Place ]  [ Find a Flatmate ]
+
+No brokerage • Free to use • Chat directly
+
+──────────────────────────────────
+
+Browse by Location
+
+[Gurgaon] [Delhi] [Noida] [Bangalore]
+
+──────────────────────────────────
+
+Latest Listings
+
+[Listing] [Listing] [Listing] [Listing]
+
+View All →
+
+──────────────────────────────────
+
+How It Works
+
+1. Create your profile
+2. Find a match
+3. Chat directly
+4. Move in
+
+──────────────────────────────────
+
+Footer
+```
+
+---
+
+## 2. Explore
+
+`/explore`
+
+This is your main discovery page.
+
+### Desktop layout
+
+```text
+┌───────────────┬─────────────────────────────────┐
+│ FILTERS       │ Search Results                  │
+│               │                                 │
+│ Location      │ [ Listing ] [ Listing ]         │
+│ Budget        │                                 │
+│ Gender        │ [ Listing ] [ Listing ]         │
+│ Move-in       │                                 │
+│ Room Type     │ [ Listing ] [ Listing ]         │
+│               │                                 │
+└───────────────┴─────────────────────────────────┘
+```
+
+### Mobile
+
+Filters should open in a bottom sheet/modal.
+
+At the top:
+
+```text
+[🔍 Search Gurgaon, Delhi, Noida]
+
+[Filters] [Sort]
+
+156 listings found
+```
+
+---
+
+# 3. Listing card
+
+Every listing should have a consistent card.
+
+Example:
+
+```text
+┌─────────────────────────────┐
+│                             │
+│        PROPERTY IMAGE       │
+│                             │
+├─────────────────────────────┤
+│ ₹12,000 / month             │
+│ Private Room in 3BHK        │
+│ 📍 Sector 43, Gurgaon       │
+│                             │
+│ 👤 Rahul • Working Professional
+│ Available from 1 Sep        │
+│                             │
+│ [92% Match]          ♡      │
+└─────────────────────────────┘
+```
+
+Don't overload cards with 20 details.
+
+---
+
+# 4. Listing detail page
+
+URL example:
+
+`/listing/private-room-sector-43-gurgaon/abc123`
+
+Layout:
+
+```text
+PHOTO GALLERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+← Back
+
+Private Room in 3BHK
+📍 Sector 43, Gurgaon
+
+₹12,000 / month
+
+Available from 1 September
+
+[ ❤️ Save ]    [ 💬 Chat Now ]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+About this place
+
+Full description...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Property Details
+
+Property Type: Apartment
+Room: Private
+Bathroom: Attached
+Currently living: 2 people
+Vacancy: 1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Amenities
+
+WiFi • AC • Kitchen
+Washing Machine • Parking
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Looking for
+
+Male • Working Professional
+Non-smoker preferred
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Posted by
+
+[Photo] Rahul
+25 • Software Engineer
+✓ Phone Verified
+
+[ View Profile ] [ Chat ]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Report Listing
+```
+
+On desktop, keep a **sticky Chat button** on the right.
+
+---
+
+# 5. Create listing flow
+
+Don't show a massive form.
+
+Use a multi-step wizard.
+
+## Step 1: What do you want?
+
+```text
+What are you looking for?
+
+🏠
+I HAVE A PLACE
+
+I have a room or property and
+want a flatmate
+
+[ Select ]
+
+────────────
+
+🔍
+I NEED A PLACE
+
+I'm looking for a room,
+flat or accommodation
+
+[ Select ]
+```
+
+---
+
+## Step 2A: If "I Have a Place"
+
+Ask:
+
+### Basic details
+
+* Listing title
+* Property type
+* Room type
+* Number of people currently living
+* Number of vacancies
+
+Then:
+
+### Location
+
+```text
+City
+Locality
+Nearby landmark
+
+[ Select location on map ]
+```
+
+Don't force the exact address to be public.
+
+---
+
+### Money
+
+* Monthly rent
+* Security deposit
+* Approximate monthly expenses
+
+---
+
+### Availability
+
+* Available from
+* Minimum stay
+
+---
+
+### Preferences
+
+Who are you looking for?
+
+* Male / Female / Any
+* Student / Professional / Any
+* Smoking preference
+* Drinking preference
+* Food preference
+
+---
+
+### Photos
+
+```text
+Upload photos
+
+[ + Add Photo ]
+
+Drag photos to change order
+```
+
+---
+
+### Final step
+
+Preview:
+
+```text
+Your listing is ready!
+
+[ Save as Draft ]
+
+[ Publish for Free ]
+```
+
+---
+
+# 6. If "I Need a Place"
+
+This should take less than 2 minutes.
+
+## Step 1
+
+Where are you looking?
+
+```text
+[ Search city/locality ]
+```
+
+Allow multiple locations:
+
+```text
+Gurgaon ×
+Cyber City ×
+Udyog Vihar ×
+```
+
+---
+
+## Step 2
+
+Budget:
+
+```text
+₹ Minimum  ───────── ₹ Maximum
+```
+
+Accommodation:
+
+* Private room
+* Shared room
+* PG
+* Entire flat
+
+---
+
+## Step 3
+
+Move-in date.
+
+```text
+○ Immediately
+○ Select date
+○ Flexible
+```
+
+---
+
+## Step 4
+
+Preferences:
+
+* Gender
+* Flatmate preference
+* Smoking
+* Drinking
+* Food
+* Pets
+
+---
+
+## Step 5
+
+Description:
+
+> Tell people what you're looking for.
+
+Example:
+
+> I'm a software professional looking for a private room near Cyber City. Budget is up to ₹15,000.
+
+Then:
+
+**Publish for Free**
+
+---
+
+# 7. User onboarding
+
+After signup, don't show a boring profile form.
+
+Ask questions conversationally.
+
+### Screen 1
+
+> Let's get to know you.
+
+Profile photo — optional initially.
+
+### Screen 2
+
+> What best describes you?
+
+* 🎓 Student
+* 💼 Working professional
+* 💻 Self-employed
+* Other
+
+### Screen 3
+
+> A few preferences
+
+Smoking, food, drinking, etc.
+
+Allow:
+
+**Skip for now**
+
+The user should be able to complete onboarding quickly.
+
+---
+
+# 8. Chat flow
+
+When someone clicks **Chat Now**:
+
+### If logged out
+
+```text
+Sign in to chat
+
+Chat directly with verified users
+and find your next place for free.
+
+[ Continue with Google ]
+
+──────── OR ────────
+
+[ Continue with Mobile ]
+```
+
+### After login
+
+Automatically create the conversation.
+
+The first message can include the listing:
+
+```text
+━━━━━━━━━━━━━━━━━━
+
+Private Room in 3BHK
+
+₹12,000/month
+Sector 43, Gurgaon
+
+━━━━━━━━━━━━━━━━━━
+
+Hi Rahul, is this room still available?
+```
+
+User can edit/remove that message before sending.
+
+---
+
+# 9. Chat UI
+
+```text
+← Rahul                         ⋮
+
+Private Room in Sector 43
+₹12,000/month
+
+────────────────────────
+
+Hi, is this still available?
+
+Yes, it is available.
+
+Can I visit this weekend?
+
+────────────────────────
+
+[ + ]  Type a message...  [Send]
+```
+
+Menu:
+
+* View profile
+* View listing
+* Block user
+* Report user
+
+---
+
+# 10. Profile page
+
+Public profile:
+
+```text
+[ PROFILE PHOTO ]
+
+Rahul, 25
+Software Engineer
+
+✓ Phone Verified
+
+About
+Software engineer working in Gurgaon.
+
+━━━━━━━━━━━━━━
+
+Lifestyle
+
+🚭 Non-smoker
+🥗 Vegetarian
+🐶 Okay with pets
+
+━━━━━━━━━━━━━━
+
+Active Listings
+
+[ Listing Card ]
+[ Listing Card ]
+```
+
+Avoid displaying sensitive information.
+
+---
+
+# 11. Logged-in dashboard
+
+`/dashboard`
+
+Navigation:
+
+```text
+Overview
+My Listings
+Saved
+Messages
+Notifications
+Profile
+Settings
+```
+
+### Overview
+
+Show:
+
+```text
+Active Listings: 2
+Unread Messages: 4
+Saved Listings: 12
+
+Your listings received:
+👁 145 Views
+💬 8 Conversations
+```
+
+Basic analytics will encourage users to keep listings active.
+
+---
+
+# 12. Admin panel structure
+
+Separate from the public website.
+
+```text
+/admin
+
+Dashboard
+
+Users
+Listings
+Reports
+Messages / Safety
+Locations
+Verification
+Ads
+Analytics
+Settings
+```
+
+For V1, focus heavily on:
+
+### Reports
+
+```text
+REPORT #1042
+
+Reported listing:
+Private Room in Gurgaon
+
+Reason:
+Possible scam
+
+Reported by:
+User ID 2481
+
+[ View Listing ]
+[ View User ]
+
+Actions:
+
+[ No Action ]
+[ Remove Listing ]
+[ Warn User ]
+[ Suspend User ]
+[ Ban User ]
+```
+
+---
+
+# 13. Exact core database relationships
+
+The structure should be approximately:
+
+```text
+USER
+ │
+ ├── USER_PROFILE
+ │
+ ├── LISTINGS
+ │      │
+ │      ├── LISTING_PHOTOS
+ │      ├── LISTING_AMENITIES
+ │      └── LISTING_PREFERENCES
+ │
+ ├── SAVED_LISTINGS
+ │
+ ├── CONVERSATIONS
+ │       │
+ │       └── MESSAGES
+ │
+ ├── NOTIFICATIONS
+ │
+ ├── REPORTS
+ │
+ └── BLOCKED_USERS
+```
+
+This is enough for V1 and will work later with Android.
+
+---
+
+# 14. Important API design
+
+Since Android comes later:
+
+```text
+Web Frontend
+      │
+      ▼
+REST / API Backend
+      │
+      ├── Authentication
+      ├── Users
+      ├── Listings
+      ├── Search
+      ├── Chat
+      ├── Notifications
+      └── Admin
+              │
+              ▼
+          PostgreSQL
+```
+
+Your website should **never directly depend on the database structure from the frontend**.
+
+Build proper APIs from day one.
+
+---
+
+# 15. Recommended development milestones
+
+## Milestone 1 — Foundation
+
+Build:
+
+* Authentication
+* User accounts
+* Profile
+* Database
+* Admin login
+
+**Result:** Users can register and create profiles.
+
+---
+
+## Milestone 2 — Listings
+
+Build:
+
+* Create listing
+* Edit listing
+* Delete listing
+* Upload photos
+* Publish
+* Expiry
+
+**Result:** Real users can start adding content.
+
+---
+
+## Milestone 3 — Discovery
+
+Build:
+
+* Explore page
+* Search
+* Location filters
+* Budget filters
+* Listing details
+* Save listing
+
+**Result:** Users can discover listings.
+
+---
+
+## Milestone 4 — Chat
+
+Build:
+
+* Conversations
+* Real-time messages
+* Unread counts
+* Image messages
+* Block/report
+
+**Result:** The platform's core loop is complete.
+
+---
+
+## Milestone 5 — Trust & moderation
+
+Build:
+
+* Phone verification
+* Reports
+* Admin moderation
+* User suspension
+* Listing removal
+* Auto-expiry
+
+**Result:** Safer platform.
+
+---
+
+## Milestone 6 — Growth
+
+Build:
+
+* SEO location pages
+* Share listing
+* Referral links
+* Analytics
+* Ad placements
+
+---
+
+# What I would do next
+
+Before starting development, create these **four deliverables**:
+
+1. **Product name and branding**
+2. **Complete database schema**
+3. **API specification**
+4. **Premium website UI design**
+
+Then development becomes much easier because there is no confusion about what Claude Code or another AI coding tool should build.
+
+I suggest we now start with **Step 1: choosing the product name + defining the brand and premium UI direction**, and then move to the exact database schema and development prompt.
