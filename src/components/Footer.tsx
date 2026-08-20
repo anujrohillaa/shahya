@@ -79,9 +79,20 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <a
+                  href="https://wa.me/919817283155?text=Hi%20Shahya%20Team,%20I%20have%20a%20query."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-emerald-300 text-emerald-400 font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
+                  <span>WhatsApp: +91 9817283155</span>
+                </a>
+              </li>
+              <li>
                 <Link href="/contact" className="hover:text-white transition-colors flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Contact Support</span>
+                  <span>Contact & Help</span>
                 </Link>
               </li>
               <li>

@@ -106,9 +106,9 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2 border-t border-slate-100 pt-4">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">8. Contact & Legal Inquiries</h2>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">8. Contact & Support</h2>
             <p>
-              If you have any questions regarding these Terms, please contact our legal and support team at <Link href="/contact" className="text-brand-600 underline font-semibold">Contact Us</Link> or email <strong>legal@shahya.com</strong>.
+              If you have any questions regarding these Terms, please contact our support team directly via WhatsApp on <strong>+91 9817283155</strong> or visit our <Link href="/contact" className="text-brand-600 underline font-semibold">Contact Page</Link>.
             </p>
           </section>
 
