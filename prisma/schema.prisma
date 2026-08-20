@@ -2,8 +2,9 @@
 // Designed for PostgreSQL (with SQLite compatibility for fast local dev)
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -133,8 +134,8 @@ model ListingPreference {
 
 model Conversation {
   id              String    @id @default(cuid())
-  listingId       String
-  listing         Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId       String?
+  listing         Listing?  @relation(fields: [listingId], references: [id], onDelete: Cascade)
   user1Id         String
   user1           User      @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
   user2Id         String
@@ -145,8 +146,6 @@ model Conversation {
   messages        Message[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-
-  @@unique([listingId, user1Id, user2Id])
 }
 
 model Message {
