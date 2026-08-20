@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -36,12 +39,20 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({
-      user,
-      unreadMessagesCount,
-      notificationsCount,
-    });
+    return NextResponse.json(
+      {
+        user,
+        unreadMessagesCount,
+        notificationsCount,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        },
+      }
+    );
   } catch (error: any) {
+    console.error('Session endpoint error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

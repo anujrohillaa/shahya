@@ -31,19 +31,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [notificationsCount, setNotificationsCount] = useState(0);
   const router = useRouter();
 
+  // Instant client cache hydration
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('shahya_user');
+      if (cached) {
+        setUser(JSON.parse(cached));
+        setLoading(false);
+      }
+    } catch (e) {}
+  }, []);
+
   const refreshSession = async () => {
     try {
-      const res = await fetch('/api/auth/session');
+      const res = await fetch('/api/auth/session', {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        if (data.user) {
+          localStorage.setItem('shahya_user', JSON.stringify(data.user));
+        } else {
+          localStorage.removeItem('shahya_user');
+        }
         setUnreadMessagesCount(data.unreadMessagesCount || 0);
         setNotificationsCount(data.notificationsCount || 0);
       } else {
         setUser(null);
+        localStorage.removeItem('shahya_user');
       }
     } catch (e) {
-      setUser(null);
+      console.warn('Session refresh error:', e);
     } finally {
       setLoading(false);
     }
