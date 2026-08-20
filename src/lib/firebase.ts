@@ -23,9 +23,20 @@ export const auth = app ? getAuth(app) : null;
  * Initializes invisible reCAPTCHA verifier for Phone Auth
  */
 export function setupRecaptcha(containerId: string = 'recaptcha-container') {
-  if (!auth) return null;
+  if (typeof window === 'undefined' || !auth) return null;
 
   try {
+    // If verifier already exists and rendered, reuse it
+    if ((window as any).recaptchaVerifier) {
+      return (window as any).recaptchaVerifier;
+    }
+
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.warn(`reCAPTCHA container #${containerId} not found in DOM`);
+      return null;
+    }
+
     const verifier = new RecaptchaVerifier(auth, containerId, {
       size: 'invisible',
       callback: () => {
@@ -33,8 +44,16 @@ export function setupRecaptcha(containerId: string = 'recaptcha-container') {
       },
       'expired-callback': () => {
         // Response expired
+        if ((window as any).recaptchaVerifier) {
+          try {
+            (window as any).recaptchaVerifier.clear();
+          } catch (e) {}
+          (window as any).recaptchaVerifier = null;
+        }
       },
     });
+
+    (window as any).recaptchaVerifier = verifier;
     return verifier;
   } catch (error) {
     console.error('Error setting up reCAPTCHA:', error);
@@ -47,7 +66,7 @@ export function setupRecaptcha(containerId: string = 'recaptcha-container') {
  */
 export async function sendPhoneOtp(phoneNumber: string, recaptchaVerifier: any): Promise<ConfirmationResult | null> {
   if (!auth) {
-    throw new Error('Firebase is not configured. Please add NEXT_PUBLIC_FIREBASE_API_KEY in .env');
+    throw new Error('Firebase is not configured. Please verify NEXT_PUBLIC_FIREBASE_API_KEY in environment variables.');
   }
 
   // Format phone number to E.164 (e.g. +919876543210)

@@ -170,60 +170,77 @@ function LoginContent() {
 
     if (!otpSent) {
       if (!emailOrPhone) {
-        setError('Please enter your mobile number');
+        setError('Please enter your 10-digit mobile number');
         return;
       }
 
       setLoading(true);
       try {
-        // Try Firebase Phone Auth if configured
         const { setupRecaptcha, sendPhoneOtp } = await import('@/lib/firebase');
         const verifier = setupRecaptcha('recaptcha-container');
 
-        if (verifier) {
-          const result = await sendPhoneOtp(emailOrPhone, verifier);
-          setConfirmationResult(result);
+        if (!verifier) {
+          throw new Error('Could not initialize security verification. Please check that your domain is added to Firebase Authorized Domains.');
         }
-        setOtpSent(true);
+
+        const result = await sendPhoneOtp(emailOrPhone, verifier);
+        if (result) {
+          setConfirmationResult(result);
+          setOtpSent(true);
+        } else {
+          throw new Error('Failed to send SMS OTP. Please verify your phone number.');
+        }
       } catch (fbErr: any) {
-        console.warn('Firebase Phone Auth:', fbErr.message);
-        // Fallback for local testing if Firebase keys are pending
-        setOtpSent(true);
+        console.error('Firebase Phone Auth Error:', fbErr);
+        if (typeof window !== 'undefined') {
+          try {
+            (window as any).recaptchaVerifier?.clear();
+          } catch (e) {}
+          (window as any).recaptchaVerifier = null;
+        }
+
+        let friendlyMsg = fbErr.message || 'Failed to send SMS OTP';
+        if (fbErr.code === 'auth/invalid-phone-number') {
+          friendlyMsg = 'Invalid phone number format. Please enter a valid mobile number (e.g. +91 98765 43210).';
+        } else if (fbErr.code === 'auth/quota-exceeded') {
+          friendlyMsg = 'Firebase SMS quota limit reached for today. You can also sign in with Google or Email/Password.';
+        } else if (fbErr.code === 'auth/unauthorized-domain') {
+          friendlyMsg = 'This domain is not authorized in Firebase Console. Add this domain in Firebase Console -> Authentication -> Settings -> Authorized Domains.';
+        } else if (fbErr.code === 'auth/too-many-requests') {
+          friendlyMsg = 'Too many requests. Please wait a few moments before requesting another OTP.';
+        } else if (fbErr.code === 'auth/internal-error' || fbErr.code === 'auth/captcha-check-failed') {
+          friendlyMsg = 'reCAPTCHA check failed. Please refresh the page and try again.';
+        }
+        setError(friendlyMsg);
       } finally {
         setLoading(false);
       }
       return;
     }
 
-    if (!otpCode) {
-      setError('Please enter the 6-digit OTP');
+    if (!otpCode || otpCode.trim().length < 6) {
+      setError('Please enter the 6-digit OTP received via SMS');
       return;
     }
 
     setLoading(true);
     try {
-      let idToken: string | undefined;
-
-      // If real Firebase confirmationResult exists, verify with Firebase
-      if (confirmationResult) {
-        const userCredential = await confirmationResult.confirm(otpCode);
-        idToken = await userCredential.user.getIdToken();
-      } else {
-        // Fallback for testing OTP
-        if (otpCode !== '123456' && otpCode !== '000000') {
-          setError('Invalid OTP code. For testing use 123456');
-          setLoading(false);
-          return;
-        }
+      if (!confirmationResult) {
+        throw new Error('OTP session expired. Please request a new OTP code.');
       }
 
-      // Authenticate with server and create session cookie
+      // Verify OTP code with Firebase
+      const userCredential = await confirmationResult.confirm(otpCode.trim());
+      const idToken = await userCredential.user.getIdToken();
+      const verifiedPhone = userCredential.user.phoneNumber || emailOrPhone;
+
+      // Authenticate with server and create session in PostgreSQL
       const res = await fetch('/api/auth/otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           idToken,
-          phone: emailOrPhone,
+          phone: verifiedPhone,
           name: name || undefined,
         }),
       });
@@ -236,7 +253,14 @@ function LoginContent() {
         setError(data.error || 'Failed to authenticate phone OTP');
       }
     } catch (err: any) {
-      setError(err.message || 'OTP verification failed');
+      console.error('OTP confirmation error:', err);
+      let friendlyMsg = err.message || 'Invalid OTP code';
+      if (err.code === 'auth/invalid-verification-code') {
+        friendlyMsg = 'Incorrect OTP code. Please check the SMS and try again.';
+      } else if (err.code === 'auth/code-expired') {
+        friendlyMsg = 'This OTP code has expired. Please request a new code.';
+      }
+      setError(friendlyMsg);
     } finally {
       setLoading(false);
     }
@@ -445,32 +469,53 @@ function LoginContent() {
               </div>
 
               {otpSent && (
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                    Enter OTP Code (Sent to your phone)
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    6-Digit SMS Verification Code
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter 123456"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="• • • • • •"
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    className="w-full text-center tracking-widest text-lg font-black px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    className="w-full text-center tracking-widest text-xl font-black px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
+                    autoFocus
                   />
-                  <p className="text-[11px] text-emerald-600 mt-1 text-center font-semibold">
-                    ✓ Demo OTP Code: 123456
-                  </p>
+                  <div className="flex items-center justify-between text-[11px] pt-1">
+                    <span className="text-slate-500">Sent to {emailOrPhone}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtpSent(false);
+                        setOtpCode('');
+                        setError('');
+                        if (typeof window !== 'undefined') {
+                          try {
+                            (window as any).recaptchaVerifier?.clear();
+                          } catch (e) {}
+                          (window as any).recaptchaVerifier = null;
+                        }
+                      }}
+                      className="font-bold text-brand-600 hover:text-brand-700 hover:underline"
+                    >
+                      Change Number / Resend
+                    </button>
+                  </div>
                 </div>
               )}
 
               {/* Invisible Firebase reCAPTCHA Container */}
-              <div id="recaptcha-container" />
+              <div id="recaptcha-container" className="flex justify-center" />
 
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md transition-all disabled:opacity-50"
               >
-                {loading ? (otpSent ? 'Verifying...' : 'Sending SMS...') : (otpSent ? 'Verify & Continue' : 'Send OTP Code')}
+                {loading ? (otpSent ? 'Verifying Code...' : 'Sending SMS...') : (otpSent ? 'Verify & Continue' : 'Send OTP Code')}
               </button>
             </form>
           )}
