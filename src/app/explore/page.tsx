@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Search,
   SlidersHorizontal,
@@ -11,7 +12,8 @@ import {
   X,
   RotateCcw,
   Check,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import ListingCard from '@/components/ListingCard';
 import { ListingGridSkeleton } from '@/components/ui/CustomLoader';
