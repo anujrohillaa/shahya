@@ -116,10 +116,8 @@ export default function PostListingPage() {
 
     Promise.all(readers).then(dataUrls => {
       if (dataUrls.length > 0) {
-        setCurrentImageToCrop(dataUrls[0]);
-        setPendingQueue(dataUrls.slice(1));
-        setEditingPhotoIndex(null);
-        setCropModalOpen(true);
+        // Direct addition - instant and auto-scaled!
+        setPhotos(prev => [...prev, ...dataUrls]);
       }
     });
 
@@ -167,9 +165,7 @@ export default function PostListingPage() {
 
   const handleAddPhotoFromUrl = () => {
     if (newPhotoUrl.trim()) {
-      setCurrentImageToCrop(newPhotoUrl.trim());
-      setEditingPhotoIndex(null);
-      setCropModalOpen(true);
+      setPhotos(prev => [...prev, newPhotoUrl.trim()]);
       setNewPhotoUrl('');
     }
   };
@@ -849,7 +845,7 @@ export default function PostListingPage() {
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 {intent === 'HAVE_PLACE'
-                  ? 'Upload clear room photos. Photos are automatically cropped to the recommended 16:9 ratio.'
+                  ? 'Upload room photos directly. Images automatically scale and zoom cleanly without distortion.'
                   : 'Review your preferences and target budget before publishing to Shahya.'}
               </p>
             </div>
@@ -907,12 +903,12 @@ export default function PostListingPage() {
                       <span className="text-brand-600 underline">Click to upload</span> or drag and drop photos
                     </p>
                     <p className="text-xs text-slate-500">
-                      Recommended size: <strong className="text-slate-700">16:9 Landscape</strong> • PNG, JPG, WEBP
+                      PNG, JPG, WEBP • Direct upload with automatic card scaling
                     </p>
                   </div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
-                    <Crop className="w-3.5 h-3.5" />
-                    <span>Auto-crops to optimal card size • You can adjust framing</span>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Instant Direct Upload • Auto-scaled to 16:9</span>
                   </div>
                 </div>
 
@@ -998,7 +994,7 @@ export default function PostListingPage() {
                     onClick={handleAddPhotoFromUrl}
                     className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors whitespace-nowrap"
                   >
-                    Add & Crop
+                    Add Photo
                   </button>
                 </div>
               </>
