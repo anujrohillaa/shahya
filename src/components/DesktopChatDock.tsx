@@ -35,7 +35,7 @@ interface ActiveChat {
 }
 
 export default function DesktopChatDock() {
-  const { user } = useAuth();
+  const { user, setUnreadMessagesCount } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -175,10 +175,14 @@ export default function DesktopChatDock() {
       ]);
     }
 
-    // 2. Clear unread badge locally
-    setConversations((prev) =>
-      prev.map((c) => (c.id === convoId ? { ...c, unreadCount: 0 } : c))
-    );
+    // 2. Clear unread badge locally and globally
+    setConversations((prev) => {
+      const convo = prev.find((c) => c.id === convoId);
+      if (convo && convo.unreadCount && convo.unreadCount > 0) {
+        setUnreadMessagesCount(globalPrev => Math.max(0, globalPrev - convo.unreadCount!));
+      }
+      return prev.map((c) => (c.id === convoId ? { ...c, unreadCount: 0 } : c));
+    });
 
     // 3. Fetch full message history for this conversation
     try {

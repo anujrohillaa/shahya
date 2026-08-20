@@ -8,6 +8,7 @@ interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
   unreadMessagesCount: number;
+  setUnreadMessagesCount: React.Dispatch<React.SetStateAction<number>>;
   notificationsCount: number;
   refreshSession: () => Promise<void>;
   switchDemoUser: (roleOrEmail: string) => Promise<void>;
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   unreadMessagesCount: 0,
+  setUnreadMessagesCount: () => {},
   notificationsCount: 0,
   refreshSession: async () => {},
   switchDemoUser: async () => {},
@@ -80,8 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       eventSource.addEventListener('message', (event) => {
         try {
           const msg = JSON.parse(event.data);
-          // If message is for another conversation, increment unread count
-          setUnreadMessagesCount(prev => prev + 1);
+          // Only increment if message is from someone else
+          if (msg && msg.senderId && user && msg.senderId !== user.id) {
+            setUnreadMessagesCount(prev => prev + 1);
+          }
         } catch (err) {}
       });
 
@@ -128,6 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         loading,
         unreadMessagesCount,
+        setUnreadMessagesCount,
         notificationsCount,
         refreshSession,
         switchDemoUser,

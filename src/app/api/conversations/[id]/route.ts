@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -65,6 +65,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Calculate how many were unread BEFORE marking them as read
+    const clearedUnreadCount = conversation.messages.filter(m => !m.isRead && m.senderId !== user.id).length;
+
     // Mark messages from other user as read
     await prisma.message.updateMany({
       where: {
@@ -78,6 +81,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const otherUser = conversation.user1Id === user.id ? conversation.user2 : conversation.user1;
 
     return NextResponse.json({
+      clearedUnreadCount,
       conversation: {
         id: conversation.id,
         listingId: conversation.listingId,

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getAuthUser, getCurrentUser } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }

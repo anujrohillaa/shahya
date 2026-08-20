@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getAuthUser, getCurrentUser } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const currentUser = await getCurrentUser();
+    const currentUser = getAuthUser();
 
     const type = searchParams.get('type'); // HAVE_PLACE, NEED_PLACE
     const city = searchParams.get('city');

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getAuthUser } from '@/lib/auth';
 import { broadcastNewMessage, broadcastNotification } from '@/lib/realtime';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -91,6 +91,9 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    // Calculate how many were unread before marking read
+    const clearedUnreadCount = messages.filter(m => !m.isRead && m.senderId !== user.id).length;
+
     // 3. Mark unread incoming messages as read in the background without blocking response
     prisma.message.updateMany({
       where: {
@@ -116,6 +119,7 @@ export async function GET(req: NextRequest) {
     }));
 
     return NextResponse.json({
+      clearedUnreadCount,
       messages: formattedMessages,
       otherUser,
       listing: conversation.listing,
@@ -127,7 +131,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -201,16 +205,18 @@ export async function POST(req: NextRequest) {
           lastMessageAt: new Date(),
         },
       }),
-      prisma.notification.create({
-        data: {
-          userId: recipientId,
-          title: `Message from ${user.name}`,
-          message: messageText.length > 60 ? `${messageText.slice(0, 60)}...` : messageText,
-          link: `/messages/${conversationId}`,
-          type: 'MESSAGE',
-        },
-      }),
     ]);
+
+    // Create notification in background (non-blocking)
+    prisma.notification.create({
+      data: {
+        userId: recipientId,
+        title: `Message from ${message.sender.name}`,
+        message: messageText.length > 60 ? `${messageText.slice(0, 60)}...` : messageText,
+        link: `/messages/${conversationId}`,
+        type: 'MESSAGE',
+      },
+    }).catch(() => {});
 
     const payload = {
       id: message.id,

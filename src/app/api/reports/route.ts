@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getAuthUser, getCurrentUser } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized. Please sign in to submit a report.' }, { status: 401 });
     }

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getAuthUser, getCurrentUser } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = getAuthUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized. Please login to delete your account.' }, { status: 401 });
     }

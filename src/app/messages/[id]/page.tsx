@@ -23,7 +23,7 @@ import { soundManager } from '@/lib/notificationSound';
 
 export default function ConversationDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, setUnreadMessagesCount } = useAuth();
   const router = useRouter();
 
   const [conversation, setConversation] = useState<any>(null);
@@ -61,13 +61,9 @@ export default function ConversationDetailPage() {
         setMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('touchstart', handleOutsideClick);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('touchstart', handleOutsideClick);
-    };
-  }, []);
+    if (menuOpen) document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [menuOpen]);
 
   // Lock body scroll and track visual viewport height when keyboard opens/closes
   useEffect(() => {
@@ -87,7 +83,9 @@ export default function ConversationDetailPage() {
         setViewportTop(window.visualViewport.offsetTop);
       } else {
         setViewportHeight(window.innerHeight);
+        setViewportTop(0);
       }
+      setTimeout(() => scrollToBottom('auto'), 100);
     };
 
     updateViewport();
@@ -126,6 +124,9 @@ export default function ConversationDetailPage() {
           const data = await res.json();
           setConversation(data.conversation);
           setMessages(data.conversation.messages || []);
+          if (data.clearedUnreadCount > 0) {
+            setUnreadMessagesCount(prev => Math.max(0, prev - data.clearedUnreadCount));
+          }
         }
       } catch (err) {
         console.error(err);

@@ -32,18 +32,37 @@ export async function comparePassword(password: string, hash: string): Promise<b
   return bcrypt.compare(password, hash);
 }
 
-export async function getCurrentUser() {
+/**
+ * FAST auth check — JWT-only, zero database queries.
+ * Use this for most API routes that just need userId/role to authorize.
+ * Returns { id, role } from the JWT token, or null if not authenticated.
+ */
+export function getAuthUser(): { id: string; role: string } | null {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('flatmate_token')?.value;
-
     if (!token) return null;
 
     const payload = verifyToken(token);
     if (!payload || !payload.userId) return null;
 
+    return { id: payload.userId, role: payload.role };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * FULL user fetch — hits the database. Use ONLY when you need the full user profile
+ * (e.g., /api/auth/session, /api/profile, admin pages).
+ */
+export async function getCurrentUser() {
+  try {
+    const auth = getAuthUser();
+    if (!auth) return null;
+
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: auth.id },
       select: {
         id: true,
         name: true,
