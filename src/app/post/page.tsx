@@ -178,6 +178,83 @@ export default function PostListingPage() {
     setPhotos(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const validateStep = (currentStep: number): boolean => {
+    setError('');
+
+    if (currentStep === 1) {
+      if (!intent) {
+        setError('Please select whether you have a place or need a place.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      }
+    }
+
+    if (currentStep === 2) {
+      if (!title.trim()) {
+        setError('Please enter a listing title (e.g. Master Bedroom in Sector 56, Gurgaon).');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      }
+      if (title.trim().length < 5) {
+        setError('Listing title must be at least 5 characters long.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      }
+      if (intent === 'HAVE_PLACE') {
+        if (!bedrooms || parseInt(bedrooms) <= 0) {
+          setError('Please specify the number of bedrooms (BHK).');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return false;
+        }
+        if (!vacancies || parseInt(vacancies) <= 0) {
+          setError('Please specify the vacancy count (at least 1 vacancy).');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return false;
+        }
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!city.trim()) {
+        setError('Please select a city.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      }
+      if (!locality.trim()) {
+        setError('Please enter your specific locality or sector (e.g. Sector 56, IMT Manesar, Saket).');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      }
+      if (intent === 'HAVE_PLACE') {
+        if (!rent || parseInt(rent) <= 0) {
+          setError('Please enter a valid monthly rent amount (₹/month).');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return false;
+        }
+      } else {
+        if (!maxBudget || parseInt(maxBudget) <= 0) {
+          setError('Please enter your maximum monthly budget (₹/month).');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return false;
+        }
+        if (minBudget && parseInt(minBudget) > parseInt(maxBudget)) {
+          setError('Minimum budget cannot exceed maximum budget.');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const handleNextStep = () => {
+    if (validateStep(step)) {
+      setStep(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleSubmit = async (publishStatus: 'ACTIVE' | 'DRAFT') => {
     if (!user) {
       router.push('/login');
@@ -185,7 +262,14 @@ export default function PostListingPage() {
     }
 
     if (!title || !city || !locality) {
-      setError('Please fill in the title, city, and locality');
+      setError('Please fill in the title, city, and locality before publishing.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (intent === 'HAVE_PLACE' && publishStatus === 'ACTIVE' && photos.length === 0) {
+      setError('Please upload at least 1 property photo before publishing your room listing.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -331,11 +415,11 @@ export default function PostListingPage() {
 
           </div>
 
-          <div className="pt-4 flex justify-end">
+          <div className="pt-5 flex justify-end">
             <button
               type="button"
-              onClick={() => setStep(2)}
-              className="px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm flex items-center gap-2 shadow-md transition-all hover:scale-105"
+              onClick={handleNextStep}
+              className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95"
             >
               <span>Continue</span>
               <ArrowRight className="w-4 h-4" />
@@ -361,7 +445,7 @@ export default function PostListingPage() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={intent === 'HAVE_PLACE' ? "e.g. Spacious Private Room in 3BHK near Cyber City" : "e.g. Software Engineer looking for room in Indiranagar"}
+                placeholder={intent === 'HAVE_PLACE' ? "e.g. Spacious Private Room in 3BHK near Cyber City" : "e.g. Software Engineer looking for room in IMT Manesar"}
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
             </div>
@@ -459,18 +543,18 @@ export default function PostListingPage() {
             </div>
           </div>
 
-          <div className="pt-4 flex items-center justify-between">
+          <div className="pt-5 flex items-center justify-between gap-2.5 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="px-5 py-2.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm"
+              className="px-4 sm:px-5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-slate-600 hover:text-slate-900 font-bold text-xs sm:text-sm hover:bg-slate-50 transition-colors shrink-0"
             >
               Back
             </button>
             <button
               type="button"
-              onClick={() => setStep(3)}
-              className="px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm flex items-center gap-2 shadow-md"
+              onClick={handleNextStep}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0"
             >
               <span>Next: Location & Price</span>
               <ArrowRight className="w-4 h-4" />
@@ -494,26 +578,30 @@ export default function PostListingPage() {
                 <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
                 >
-                  <option value="Gurgaon">Gurgaon</option>
+                  <option value="Gurgaon">Gurgaon / Gurugram</option>
+                  <option value="Manesar">Manesar (IMT Manesar)</option>
+                  <option value="Delhi">Delhi (NCR)</option>
+                  <option value="Noida">Noida / Greater Noida</option>
+                  <option value="Faridabad">Faridabad</option>
+                  <option value="Ghaziabad">Ghaziabad</option>
                   <option value="Bangalore">Bangalore</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Noida">Noida</option>
                   <option value="Pune">Pune</option>
                   <option value="Mumbai">Mumbai</option>
+                  <option value="Hyderabad">Hyderabad</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Locality / Area *
+                  Locality / Sector / Area *
                 </label>
                 <input
                   type="text"
                   value={locality}
                   onChange={(e) => setLocality(e.target.value)}
-                  placeholder="e.g. Sector 43, Indiranagar, HSR Layout"
+                  placeholder="e.g. Sector 56, IMT Manesar, Cyber City, Saket"
                   className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
@@ -527,7 +615,7 @@ export default function PostListingPage() {
                 type="text"
                 value={landmark}
                 onChange={(e) => setLandmark(e.target.value)}
-                placeholder="e.g. Near Millennium City Centre Metro / 100ft Road"
+                placeholder="e.g. Near Millennium City Metro / Maruti Plant / Cyberwalk"
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
             </div>
@@ -588,7 +676,7 @@ export default function PostListingPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                    Maximum Budget (₹/mo)
+                    Maximum Budget (₹/mo) *
                   </label>
                   <input
                     type="number"
@@ -601,18 +689,18 @@ export default function PostListingPage() {
             )}
           </div>
 
-          <div className="pt-4 flex items-center justify-between">
+          <div className="pt-5 flex items-center justify-between gap-2.5 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="px-5 py-2.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm"
+              className="px-4 sm:px-5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-slate-600 hover:text-slate-900 font-bold text-xs sm:text-sm hover:bg-slate-50 transition-colors shrink-0"
             >
               Back
             </button>
             <button
               type="button"
-              onClick={() => setStep(4)}
-              className="px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm flex items-center gap-2 shadow-md"
+              onClick={handleNextStep}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0"
             >
               <span>Next: Amenities & Lifestyle</span>
               <ArrowRight className="w-4 h-4" />
@@ -730,18 +818,18 @@ export default function PostListingPage() {
             </div>
           </div>
 
-          <div className="pt-4 flex items-center justify-between">
+          <div className="pt-5 flex items-center justify-between gap-2.5 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setStep(3)}
-              className="px-5 py-2.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm"
+              className="px-4 sm:px-5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-slate-600 hover:text-slate-900 font-bold text-xs sm:text-sm hover:bg-slate-50 transition-colors shrink-0"
             >
               Back
             </button>
             <button
               type="button"
-              onClick={() => setStep(5)}
-              className="px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm flex items-center gap-2 shadow-md"
+              onClick={handleNextStep}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0"
             >
               <span>{intent === 'HAVE_PLACE' ? 'Next: Photos & Review' : 'Next: Review & Publish'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -925,30 +1013,30 @@ export default function PostListingPage() {
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+          <div className="pt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setStep(4)}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm"
+              className="w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 text-slate-600 hover:text-slate-900 font-bold text-xs sm:text-sm hover:bg-slate-50 transition-colors text-center"
             >
               Back
             </button>
 
-            <div className="w-full sm:w-auto flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 disabled={submitting}
                 onClick={() => handleSubmit('DRAFT')}
-                className="w-1/2 sm:w-auto px-5 py-3 rounded-2xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs"
+                className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm transition-colors text-center"
               >
-                Save as Draft
+                Save Draft
               </button>
 
               <button
                 type="button"
                 disabled={submitting}
                 onClick={() => handleSubmit('ACTIVE')}
-                className="w-1/2 sm:w-auto px-8 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-extrabold text-sm shadow-md transition-all hover:scale-105"
+                className="flex-1 sm:flex-none px-5 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 text-center whitespace-nowrap"
               >
                 {submitting ? 'Publishing...' : '🚀 Publish for Free'}
               </button>

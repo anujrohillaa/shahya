@@ -14,18 +14,75 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shahya.com';
+
 export const metadata: Metadata = {
-  title: "Shahya — Find Rooms, Flats & Flatmates for Free | Zero Brokerage",
-  description: "Browse verified rooms, shared flats, and flatmates in Gurgaon, Bangalore, Delhi, Noida, Pune, and Mumbai. Chat directly on Shahya without contact unlock charges.",
-  keywords: "Shahya, flatmate, room for rent, shared accommodation, flat share, roommate finder, no brokerage, zero commission, shahya.com",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "Shahya — Find Rooms, Flats & Flatmates for Free | Zero Brokerage",
+    template: "%s | Shahya",
+  },
+  description: "Browse verified rooms, shared flats, and compatible flatmates in Manesar, Gurgaon, Delhi NCR, Bangalore, Noida, Pune, and Mumbai with zero brokerage and direct chat.",
+  keywords: [
+    "Shahya",
+    "flatmates in Manesar",
+    "rooms for rent in IMT Manesar",
+    "flatmates in Gurgaon",
+    "rooms in Sector 56 Gurgaon",
+    "flat share Delhi NCR",
+    "no brokerage flatmate finder",
+    "shared accommodation Gurgaon",
+    "roommate finder India",
+    "zero brokerage flat share",
+  ],
+  authors: [{ name: "Shahya Network" }],
+  creator: "Shahya",
+  publisher: "Shahya",
+  alternates: {
+    canonical: baseUrl,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: baseUrl,
+    siteName: "Shahya",
+    title: "Shahya — Find Rooms, Flats & Flatmates for Free | Zero Brokerage",
+    description: "Connect directly with verified roommates and room hosts in Manesar, Gurgaon, Delhi, and top Indian metros. 100% free with zero unlock charges.",
+    images: [
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "Shahya — Free Flatmate Discovery Network",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shahya — Find Rooms, Flats & Flatmates for Free | Zero Brokerage",
+    description: "Browse verified rooms, shared flats, and flatmates in Manesar, Gurgaon, Delhi NCR, and Bangalore with zero commission.",
+    images: ["/icon.png"],
+  },
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
     apple: "/icon.png",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 import NextTopLoader from "nextjs-toploader";
+import JsonLd, { getOrganizationSchema, getWebSiteSchema } from "@/components/JsonLd";
 
 export default function RootLayout({
   children,
@@ -34,6 +91,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <JsonLd data={getOrganizationSchema(baseUrl)} />
+        <JsonLd data={getWebSiteSchema(baseUrl)} />
+      </head>
       <body className="bg-[#f8fafc] text-slate-900 antialiased min-h-screen">
         <NextTopLoader
           color="#059669"

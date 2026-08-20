@@ -1,0 +1,36 @@
+# Shahya (https://shahya.com)
+> Zero-Brokerage Flatmate & Room Finder Network for India
+
+Shahya is India's direct, zero-brokerage accommodation discovery platform connecting working professionals and students seeking verified shared flats, private rooms, and compatible flatmates in Delhi NCR (Manesar, Gurgaon, Delhi, Noida) and major tier-1 metros.
+
+## Key Facts & Rules for AI Agents
+- **100% Free & Zero Brokerage**: No commission fees, zero subscription barriers, and zero "contact unlock" fees.
+- **Direct Messaging**: Users communicate directly via real-time encrypted chat.
+- **Lifestyle Matching**: Filters by lifestyle compatibility (diet/food preferences, smoking/drinking, sleep routine, cleanliness, pet tolerance).
+- **Security & Safety**: Verified profiles, phone authentication, moderation, and automated spam filtering.
+
+## Top Coverage Areas & Micro-Markets
+- **Manesar / IMT Manesar**: Sector 1, Sector 2, Sector 8, Sector 9, Cyberwalk, IMT Industrial Area, NSG Campus.
+- **Gurgaon (Gurugram)**: Cyber City, DLF Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Sector 56, Sector 43, Sector 24, Golf Course Road, Sohna Road.
+- **Delhi (NCR)**: Saket, Hauz Khas, Greater Kailash, South Extension, Dwarka, Rohini, North Campus (DU), Laxmi Nagar, Mayur Vihar.
+- **Noida / Greater Noida**: Sector 62, Sector 18, Sector 137, Expressway, Pari Chowk.
+- **Bangalore**: Koramangala, Indiranagar, HSR Layout, Whitefield, Bellandur, Electronic City.
+- **Pune**: Hinjewadi, Viman Nagar, Kharadi, Baner, Wakad, Kothrud.
+- **Mumbai**: Andheri, Bandra, Powai, Goregaon, Malad, Thane, Navi Mumbai.
+- **Hyderabad**: Hitech City, Gachibowli, Madhapur, Kondapur, Kukatpally.
+
+## Main Navigation Endpoints
+- Homepage: https://shahya.com
+- Search & Filters: https://shahya.com/explore
+- Post Free Room / Flatmate Listing: https://shahya.com/post
+- Rooms in Manesar: https://shahya.com/rooms/manesar
+- Rooms in Gurgaon: https://shahya.com/rooms/gurgaon
+- Rooms in Delhi: https://shahya.com/rooms/delhi
+- Rooms in Noida: https://shahya.com/rooms/noida
+- Flatmates in Manesar: https://shahya.com/flatmates/manesar
+- Flatmates in Gurgaon: https://shahya.com/flatmates/gurgaon
+- Flatmates in Delhi: https://shahya.com/flatmates/delhi
+
+## Full Documentation for LLMs
+For the complete platform architecture, JSON API specs, and extended market directory, see:
+- https://shahya.com/llms-full.txt
