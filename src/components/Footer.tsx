@@ -86,13 +86,13 @@ export default function Footer() {
                   className="hover:text-emerald-300 text-emerald-400 font-semibold transition-colors flex items-center gap-1.5"
                 >
                   <MessageCircle className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
-                  <span>WhatsApp: +91 9817283155</span>
+                  <span>Connect on WhatsApp</span>
                 </a>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-white transition-colors flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Contact & Help</span>
+                  <MessageCircle className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Contact & Support</span>
                 </Link>
               </li>
               <li>

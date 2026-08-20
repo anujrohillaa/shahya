@@ -103,7 +103,7 @@ export default function PrivacyPage() {
           <section className="space-y-2 border-t border-slate-100 pt-4">
             <h2 className="text-base sm:text-lg font-bold text-slate-900">7. Contact & Privacy Inquiries</h2>
             <p>
-              For any questions, grievances, or privacy inquiries, contact our Privacy & Support Team directly on WhatsApp at <strong>+91 9817283155</strong> or submit an inquiry on our <Link href="/contact" className="text-brand-600 underline font-semibold">Contact Page</Link>.
+              For any questions, grievances, or privacy inquiries, contact our Privacy & Support Team directly via <a href="https://wa.me/919817283155?text=Hi%20Shahya%20Team,%20I%20have%20a%20privacy%20query." target="_blank" rel="noopener noreferrer" className="text-brand-600 underline font-bold">WhatsApp Support</a> or submit an inquiry on our <Link href="/contact" className="text-brand-600 underline font-semibold">Contact Page</Link>.
             </p>
             <p className="text-xs text-slate-500 pt-1">
               <strong>Registered Office:</strong> Dhigana, Jind, Haryana - 126114, India.
