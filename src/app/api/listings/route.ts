@@ -199,9 +199,7 @@ export async function POST(req: NextRequest) {
         status,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day lifecycle
         photos: {
-          create: (photos.length > 0 ? photos : [
-            { url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&auto=format&fit=crop&q=80', isCover: true, order: 0 }
-          ]).map((p: any, idx: number) => ({
+          create: photos.map((p: any, idx: number) => ({
             url: typeof p === 'string' ? p : p.url,
             isCover: idx === 0,
             order: idx,

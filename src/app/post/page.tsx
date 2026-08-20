@@ -23,8 +23,12 @@ import {
   Shield,
   Zap,
   Coffee,
-  Check
+  Check,
+  Upload,
+  Crop,
+  Star
 } from 'lucide-react';
+import ImageCropperModal from '@/components/ImageCropperModal';
 
 export default function PostListingPage() {
   const { user } = useAuth();
@@ -81,12 +85,14 @@ export default function PostListingPage() {
     'CLEAN_HABITS',
   ]);
 
-  // Photos
-  const [photos, setPhotos] = useState<string[]>([
-    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80',
-  ]);
+  // Photos State & Cropper
+  const [photos, setPhotos] = useState<string[]>([]);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [currentImageToCrop, setCurrentImageToCrop] = useState<string | null>(null);
+  const [pendingQueue, setPendingQueue] = useState<string[]>([]);
+  const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const toggleAmenity = (name: string) => {
     setAmenities(prev => prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]);
@@ -96,9 +102,74 @@ export default function PostListingPage() {
     setPreferences(prev => prev.includes(tag) ? prev.filter(p => p !== tag) : [...prev, tag]);
   };
 
-  const handleAddPhoto = () => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const readers = files.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readers).then(dataUrls => {
+      if (dataUrls.length > 0) {
+        setCurrentImageToCrop(dataUrls[0]);
+        setPendingQueue(dataUrls.slice(1));
+        setEditingPhotoIndex(null);
+        setCropModalOpen(true);
+      }
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = (croppedDataUrl: string) => {
+    if (editingPhotoIndex !== null) {
+      setPhotos(prev => {
+        const updated = [...prev];
+        updated[editingPhotoIndex] = croppedDataUrl;
+        return updated;
+      });
+      setEditingPhotoIndex(null);
+      setCropModalOpen(false);
+      setCurrentImageToCrop(null);
+    } else {
+      setPhotos(prev => [...prev, croppedDataUrl]);
+      if (pendingQueue.length > 0) {
+        setCurrentImageToCrop(pendingQueue[0]);
+        setPendingQueue(prev => prev.slice(1));
+      } else {
+        setCropModalOpen(false);
+        setCurrentImageToCrop(null);
+      }
+    }
+  };
+
+  const handleEditPhotoCrop = (idx: number) => {
+    setEditingPhotoIndex(idx);
+    setCurrentImageToCrop(photos[idx]);
+    setCropModalOpen(true);
+  };
+
+  const handleSetCoverPhoto = (idx: number) => {
+    if (idx === 0) return;
+    setPhotos(prev => {
+      const selected = prev[idx];
+      const rest = prev.filter((_, i) => i !== idx);
+      return [selected, ...rest];
+    });
+  };
+
+  const handleAddPhotoFromUrl = () => {
     if (newPhotoUrl.trim()) {
-      setPhotos(prev => [...prev, newPhotoUrl.trim()]);
+      setCurrentImageToCrop(newPhotoUrl.trim());
+      setEditingPhotoIndex(null);
+      setCropModalOpen(true);
       setNewPhotoUrl('');
     }
   };
@@ -683,49 +754,146 @@ export default function PostListingPage() {
       {/* STEP 5: PHOTOS & PUBLISH */}
       {step === 5 && (
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-card space-y-6">
-          <h2 className="text-lg font-bold text-slate-900">Photos & Publish</h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Photos & Publish</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Upload clear room photos. Photos are automatically cropped to the recommended 16:9 ratio.
+              </p>
+            </div>
+            {photos.length > 0 && (
+              <span className="text-xs font-bold text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-brand-200">
+                {photos.length} {photos.length === 1 ? 'Photo' : 'Photos'} Added
+              </span>
+            )}
+          </div>
 
-          <div className="space-y-4">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
-              Listing Photos (Add URLs or use default sample photos)
-            </label>
+          <div className="space-y-5">
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
 
-            <div className="flex items-center gap-2">
+            {/* 1. Main Upload Dropzone */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  const fakeEvent = { target: { files: e.dataTransfer.files } } as any;
+                  handleFileSelect(fakeEvent);
+                }
+              }}
+              className="p-8 sm:p-10 border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50/60 hover:bg-brand-50/20 rounded-3xl text-center cursor-pointer transition-all group flex flex-col items-center justify-center space-y-3"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-white shadow-md border border-slate-200/80 flex items-center justify-center text-brand-600 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all">
+                <Upload className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800">
+                  <span className="text-brand-600 underline">Click to upload</span> or drag and drop photos
+                </p>
+                <p className="text-xs text-slate-500">
+                  Recommended size: <strong className="text-slate-700">16:9 Landscape</strong> • PNG, JPG, WEBP
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+                <Crop className="w-3.5 h-3.5" />
+                <span>Auto-crops to optimal card size • You can adjust framing</span>
+              </div>
+            </div>
+
+            {/* 2. Uploaded Photos Grid */}
+            {photos.length > 0 && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Uploaded Photos ({photos.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add More</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  {photos.map((url, idx) => (
+                    <div
+                      key={idx}
+                      className={`relative aspect-[16/9] rounded-2xl overflow-hidden border shadow-xs group bg-slate-900 ${
+                        idx === 0 ? 'ring-2 ring-brand-500 border-brand-500' : 'border-slate-200'
+                      }`}
+                    >
+                      <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                      
+                      {/* Cover Badge */}
+                      {idx === 0 ? (
+                        <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-lg bg-brand-600 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-md">
+                          <Star className="w-3 h-3 fill-white" />
+                          <span>Cover Photo</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSetCoverPhoto(idx)}
+                          className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-slate-900/80 text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-900"
+                        >
+                          Set as Cover
+                        </button>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => handleEditPhotoCrop(idx)}
+                          className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white transition-colors"
+                          title="Re-crop / Adjust Framing"
+                        >
+                          <Crop className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(idx)}
+                          className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors"
+                          title="Remove Photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Optional URL input fallback */}
+            <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Paste image URL (https://images.unsplash.com/...)"
+                placeholder="Or paste an image web link (https://...)"
                 value={newPhotoUrl}
                 onChange={(e) => setNewPhotoUrl(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
               <button
                 type="button"
-                onClick={handleAddPhoto}
-                className="px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                onClick={handleAddPhotoFromUrl}
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors whitespace-nowrap"
               >
-                Add Photo
+                Add & Crop
               </button>
-            </div>
-
-            {/* Photos Preview Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              {photos.map((url, idx) => (
-                <div key={idx} className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 group">
-                  <img src={url} alt={`photo ${idx + 1}`} className="w-full h-full object-cover" />
-                  {idx === 0 && (
-                    <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-bold">
-                      Cover
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleRemovePhoto(idx)}
-                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
             </div>
 
             {/* Summary Review Pill */}
@@ -767,6 +935,22 @@ export default function PostListingPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 6. INTERACTIVE IMAGE CROPPER MODAL */}
+      {cropModalOpen && currentImageToCrop && (
+        <ImageCropperModal
+          imageSrc={currentImageToCrop}
+          aspectRatio={16 / 9}
+          title={editingPhotoIndex !== null ? `Adjust Photo #${editingPhotoIndex + 1} Framing` : 'Crop & Frame Room Photo'}
+          onCropComplete={handleCropComplete}
+          onCancel={() => {
+            setCropModalOpen(false);
+            setCurrentImageToCrop(null);
+            setEditingPhotoIndex(null);
+            setPendingQueue([]);
+          }}
+        />
       )}
 
     </div>

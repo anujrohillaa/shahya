@@ -165,42 +165,78 @@ export default function PublicProfilePage() {
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Smoking</span>
             <p className="text-xs font-bold text-slate-800">
-              {userToDisplay.smoking === 'NO' ? '🚭 Non-Smoker' : userToDisplay.smoking === 'YES' ? '🚬 Smoker' : '💨 Occasionally'}
+              {userToDisplay.smoking === 'NO'
+                ? '🚭 Non-Smoker'
+                : userToDisplay.smoking === 'YES'
+                ? '🚬 Smoker'
+                : userToDisplay.smoking === 'OCCASIONALLY'
+                ? '💨 Occasionally'
+                : <span className="text-slate-400 font-medium">Not set</span>}
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Food / Diet</span>
             <p className="text-xs font-bold text-slate-800">
-              {userToDisplay.foodPreference === 'VEG' ? '🥗 Vegetarian' : userToDisplay.foodPreference === 'NON_VEG' ? '🍗 Non-Vegetarian' : '🍲 Both / Flexible'}
+              {userToDisplay.foodPreference === 'VEG'
+                ? '🥗 Vegetarian'
+                : userToDisplay.foodPreference === 'NON_VEG'
+                ? '🍗 Non-Vegetarian'
+                : userToDisplay.foodPreference === 'BOTH'
+                ? '🍲 Both / Flexible'
+                : <span className="text-slate-400 font-medium">Not set</span>}
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sleep Schedule</span>
             <p className="text-xs font-bold text-slate-800">
-              {userToDisplay.sleepSchedule === 'EARLY' ? '☀️ Early Riser' : userToDisplay.sleepSchedule === 'LATE' ? '🌙 Night Owl' : '⏰ Flexible'}
+              {userToDisplay.sleepSchedule === 'EARLY'
+                ? '☀️ Early Riser'
+                : userToDisplay.sleepSchedule === 'LATE'
+                ? '🌙 Night Owl'
+                : userToDisplay.sleepSchedule === 'FLEXIBLE'
+                ? '⏰ Flexible'
+                : <span className="text-slate-400 font-medium">Not set</span>}
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cleanliness</span>
             <p className="text-xs font-bold text-slate-800">
-              {userToDisplay.cleanliness === 'VERY_IMPORTANT' ? '✨ Very Organized' : '🧹 Normal'}
+              {userToDisplay.cleanliness === 'VERY_IMPORTANT'
+                ? '✨ Very Organized'
+                : userToDisplay.cleanliness === 'NORMAL'
+                ? '🧹 Normal'
+                : userToDisplay.cleanliness === 'FLEXIBLE'
+                ? '🛋️ Flexible'
+                : <span className="text-slate-400 font-medium">Not set</span>}
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pets</span>
             <p className="text-xs font-bold text-slate-800">
-              {userToDisplay.pets === 'HAVE_PETS' ? '🐶 Has Pets' : userToDisplay.pets === 'OKAY_WITH_PETS' ? '🐾 Okay with Pets' : '❌ No Pets'}
+              {userToDisplay.pets === 'HAVE_PETS'
+                ? '🐶 Has Pets'
+                : userToDisplay.pets === 'OKAY_WITH_PETS'
+                ? '🐾 Okay with Pets'
+                : userToDisplay.pets === 'NOT_OKAY'
+                ? '❌ No Pets'
+                : <span className="text-slate-400 font-medium">Not set</span>}
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Flatmate Preference</span>
             <p className="text-xs font-bold text-slate-800">
-              {userToDisplay.genderPreference === 'MALE' ? '👨 Male Only' : userToDisplay.genderPreference === 'FEMALE' ? '👩 Female Only' : '👥 Any Gender'}
+              {userToDisplay.genderPreference === 'MALE'
+                ? '👨 Male Only'
+                : userToDisplay.genderPreference === 'FEMALE'
+                ? '👩 Female Only'
+                : userToDisplay.genderPreference === 'ANY'
+                ? '👥 Any Gender'
+                : <span className="text-slate-400 font-medium">Not set</span>}
             </p>
           </div>
 

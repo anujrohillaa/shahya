@@ -16,14 +16,14 @@ export default function EditProfilePage() {
   const [companyCollege, setCompanyCollege] = useState(user?.companyCollege || '');
   const [bio, setBio] = useState(user?.bio || '');
 
-  // Lifestyle
-  const [smoking, setSmoking] = useState(user?.smoking || 'NO');
-  const [drinking, setDrinking] = useState(user?.drinking || 'OCCASIONALLY');
-  const [foodPreference, setFoodPreference] = useState(user?.foodPreference || 'VEG');
-  const [sleepSchedule, setSleepSchedule] = useState(user?.sleepSchedule || 'FLEXIBLE');
-  const [cleanliness, setCleanliness] = useState(user?.cleanliness || 'VERY_IMPORTANT');
-  const [pets, setPets] = useState(user?.pets || 'OKAY_WITH_PETS');
-  const [genderPreference, setGenderPreference] = useState(user?.genderPreference || 'ANY');
+  // Lifestyle (defaults to user's actual value or empty if unset)
+  const [smoking, setSmoking] = useState(user?.smoking || '');
+  const [drinking, setDrinking] = useState(user?.drinking || '');
+  const [foodPreference, setFoodPreference] = useState(user?.foodPreference || '');
+  const [sleepSchedule, setSleepSchedule] = useState(user?.sleepSchedule || '');
+  const [cleanliness, setCleanliness] = useState(user?.cleanliness || '');
+  const [pets, setPets] = useState(user?.pets || '');
+  const [genderPreference, setGenderPreference] = useState(user?.genderPreference || '');
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -44,13 +44,13 @@ export default function EditProfilePage() {
           occupation,
           companyCollege,
           bio,
-          smoking,
-          drinking,
-          foodPreference,
-          sleepSchedule,
-          cleanliness,
-          pets,
-          genderPreference,
+          smoking: smoking || null,
+          drinking: drinking || null,
+          foodPreference: foodPreference || null,
+          sleepSchedule: sleepSchedule || null,
+          cleanliness: cleanliness || null,
+          pets: pets || null,
+          genderPreference: genderPreference || null,
         }),
       });
 
@@ -171,12 +171,13 @@ export default function EditProfilePage() {
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">Smoking</label>
                 <select
                   value={smoking}
-                  onChange={(e) => setSmoking(e.target.value as any)}
+                  onChange={(e) => setSmoking(e.target.value)}
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                 >
-                  <option value="NO">Non-Smoker</option>
-                  <option value="OCCASIONALLY">Occasionally</option>
-                  <option value="YES">Smoker</option>
+                  <option value="">Not Set</option>
+                  <option value="NO">🚭 Non-Smoker</option>
+                  <option value="OCCASIONALLY">💨 Occasionally</option>
+                  <option value="YES">🚬 Smoker</option>
                   <option value="DONT_MIND">Don't Mind</option>
                 </select>
               </div>
@@ -185,12 +186,13 @@ export default function EditProfilePage() {
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">Diet / Food</label>
                 <select
                   value={foodPreference}
-                  onChange={(e) => setFoodPreference(e.target.value as any)}
+                  onChange={(e) => setFoodPreference(e.target.value)}
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                 >
-                  <option value="VEG">Vegetarian</option>
-                  <option value="NON_VEG">Non-Vegetarian</option>
-                  <option value="BOTH">Both / Any</option>
+                  <option value="">Not Set</option>
+                  <option value="VEG">🥗 Vegetarian</option>
+                  <option value="NON_VEG">🍗 Non-Vegetarian</option>
+                  <option value="BOTH">🍲 Both / Any</option>
                 </select>
               </div>
 
@@ -198,12 +200,13 @@ export default function EditProfilePage() {
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">Sleep Schedule</label>
                 <select
                   value={sleepSchedule}
-                  onChange={(e) => setSleepSchedule(e.target.value as any)}
+                  onChange={(e) => setSleepSchedule(e.target.value)}
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                 >
-                  <option value="EARLY">Early Riser</option>
-                  <option value="LATE">Night Owl</option>
-                  <option value="FLEXIBLE">Flexible</option>
+                  <option value="">Not Set</option>
+                  <option value="EARLY">☀️ Early Riser</option>
+                  <option value="LATE">🌙 Night Owl</option>
+                  <option value="FLEXIBLE">⏰ Flexible</option>
                 </select>
               </div>
 
@@ -211,12 +214,13 @@ export default function EditProfilePage() {
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">Pets</label>
                 <select
                   value={pets}
-                  onChange={(e) => setPets(e.target.value as any)}
+                  onChange={(e) => setPets(e.target.value)}
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                 >
-                  <option value="OKAY_WITH_PETS">Okay with Pets</option>
-                  <option value="HAVE_PETS">Have Pets</option>
-                  <option value="NOT_OKAY">Not Okay</option>
+                  <option value="">Not Set</option>
+                  <option value="OKAY_WITH_PETS">🐾 Okay with Pets</option>
+                  <option value="HAVE_PETS">🐶 Have Pets</option>
+                  <option value="NOT_OKAY">❌ No Pets</option>
                 </select>
               </div>
 
@@ -224,12 +228,13 @@ export default function EditProfilePage() {
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">Cleanliness</label>
                 <select
                   value={cleanliness}
-                  onChange={(e) => setCleanliness(e.target.value as any)}
+                  onChange={(e) => setCleanliness(e.target.value)}
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                 >
-                  <option value="VERY_IMPORTANT">Very Organized</option>
-                  <option value="NORMAL">Normal</option>
-                  <option value="FLEXIBLE">Flexible</option>
+                  <option value="">Not Set</option>
+                  <option value="VERY_IMPORTANT">✨ Very Organized</option>
+                  <option value="NORMAL">🧹 Normal</option>
+                  <option value="FLEXIBLE">🛋️ Flexible</option>
                 </select>
               </div>
 
@@ -237,12 +242,13 @@ export default function EditProfilePage() {
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">Flatmate Gender</label>
                 <select
                   value={genderPreference}
-                  onChange={(e) => setGenderPreference(e.target.value as any)}
+                  onChange={(e) => setGenderPreference(e.target.value)}
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                 >
-                  <option value="ANY">Any Gender</option>
-                  <option value="MALE">Male Only</option>
-                  <option value="FEMALE">Female Only</option>
+                  <option value="">Not Set</option>
+                  <option value="ANY">👥 Any Gender</option>
+                  <option value="MALE">👨 Male Only</option>
+                  <option value="FEMALE">👩 Female Only</option>
                 </select>
               </div>
             </div>
