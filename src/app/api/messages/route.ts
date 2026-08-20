@@ -3,6 +3,128 @@ import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { broadcastNewMessage, broadcastNotification } from '@/lib/realtime';
 
+export async function GET(req: NextRequest) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const conversationId = searchParams.get('conversationId');
+
+    if (!conversationId) {
+      return NextResponse.json({ error: 'conversationId parameter required' }, { status: 400 });
+    }
+
+    // 1. Verify user is part of the conversation (fast indexed check)
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      select: {
+        id: true,
+        user1Id: true,
+        user2Id: true,
+        listingId: true,
+        listing: {
+          select: {
+            id: true,
+            title: true,
+            rent: true,
+            city: true,
+            locality: true,
+            photos: {
+              take: 1,
+              orderBy: { order: 'asc' },
+              select: { url: true },
+            },
+          },
+        },
+        user1: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            occupation: true,
+            isPhoneVerified: true,
+          },
+        },
+        user2: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            occupation: true,
+            isPhoneVerified: true,
+          },
+        },
+      },
+    });
+
+    if (!conversation) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+    }
+
+    if (conversation.user1Id !== user.id && conversation.user2Id !== user.id && user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // 2. Fetch messages ordered by createdAt ascending
+    const messages = await prisma.message.findMany({
+      where: { conversationId },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+      select: {
+        id: true,
+        conversationId: true,
+        senderId: true,
+        text: true,
+        imageUrl: true,
+        isRead: true,
+        createdAt: true,
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    // 3. Mark unread incoming messages as read in the background without blocking response
+    prisma.message.updateMany({
+      where: {
+        conversationId,
+        senderId: { not: user.id },
+        isRead: false,
+      },
+      data: { isRead: true },
+    }).catch(() => {});
+
+    const otherUser = conversation.user1Id === user.id ? conversation.user2 : conversation.user1;
+
+    const formattedMessages = messages.map((m) => ({
+      id: m.id,
+      conversationId: m.conversationId,
+      senderId: m.senderId,
+      senderName: m.sender.name,
+      senderAvatar: m.sender.avatar,
+      text: m.text,
+      imageUrl: m.imageUrl,
+      isRead: m.isRead,
+      createdAt: m.createdAt,
+    }));
+
+    return NextResponse.json({
+      messages: formattedMessages,
+      otherUser,
+      listing: conversation.listing,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -18,9 +140,11 @@ export async function POST(req: NextRequest) {
 
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
-      include: {
-        listing: true,
-      }
+      select: {
+        id: true,
+        user1Id: true,
+        user2Id: true,
+      },
     });
 
     if (!conversation) {
@@ -39,53 +163,54 @@ export async function POST(req: NextRequest) {
         OR: [
           { blockerId: recipientId, blockedId: user.id },
           { blockerId: user.id, blockedId: recipientId },
-        ]
-      }
+        ],
+      },
+      select: { id: true },
     });
 
     if (isBlocked) {
       return NextResponse.json({ error: 'Cannot send message to this user' }, { status: 403 });
     }
 
-    // Create message
-    const message = await prisma.message.create({
-      data: {
-        conversationId,
-        senderId: user.id,
-        text: text || '📷 Image',
-        imageUrl: imageUrl || null,
-        isRead: false,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          }
-        }
-      }
-    });
+    const messageText = text || '📷 Image';
 
-    // Update conversation
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: {
-        lastMessageText: text || '📷 Image',
-        lastMessageAt: new Date(),
-      }
-    });
-
-    // Create notification for recipient
-    const notif = await prisma.notification.create({
-      data: {
-        userId: recipientId,
-        title: `Message from ${user.name}`,
-        message: text.length > 60 ? `${text.slice(0, 60)}...` : text,
-        link: `/messages/${conversationId}`,
-        type: 'MESSAGE',
-      }
-    });
+    // Create message and update conversation in parallel transaction
+    const [message] = await prisma.$transaction([
+      prisma.message.create({
+        data: {
+          conversationId,
+          senderId: user.id,
+          text: messageText,
+          imageUrl: imageUrl || null,
+          isRead: false,
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+      }),
+      prisma.conversation.update({
+        where: { id: conversationId },
+        data: {
+          lastMessageText: messageText,
+          lastMessageAt: new Date(),
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: recipientId,
+          title: `Message from ${user.name}`,
+          message: messageText.length > 60 ? `${messageText.slice(0, 60)}...` : messageText,
+          link: `/messages/${conversationId}`,
+          type: 'MESSAGE',
+        },
+      }),
+    ]);
 
     const payload = {
       id: message.id,
@@ -99,9 +224,8 @@ export async function POST(req: NextRequest) {
       createdAt: message.createdAt,
     };
 
-    // Broadcast in real-time
+    // Broadcast in real-time instantly
     broadcastNewMessage(payload);
-    broadcastNotification(notif);
 
     return NextResponse.json({ message: payload }, { status: 201 });
   } catch (error: any) {

@@ -1,5 +1,5 @@
 // Prisma schema for FlatMate
-// Designed for PostgreSQL (with SQLite compatibility for fast local dev)
+// Optimized for PostgreSQL with high-performance indexes
 
 datasource db {
   provider  = "postgresql"
@@ -51,6 +51,10 @@ model User {
   
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Listing {
@@ -107,6 +111,15 @@ model Listing {
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([city])
+  @@index([locality])
+  @@index([status])
+  @@index([type])
+  @@index([rent])
+  @@index([city, status, type])
+  @@index([createdAt])
 }
 
 model ListingPhoto {
@@ -116,6 +129,9 @@ model ListingPhoto {
   url         String
   isCover     Boolean  @default(false)
   order       Int      @default(0)
+
+  @@index([listingId])
+  @@index([listingId, order])
 }
 
 model ListingAmenity {
@@ -123,6 +139,8 @@ model ListingAmenity {
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
   name        String   // WIFI, AC, WASHING_MACHINE, REFRIGERATOR, TV, KITCHEN, PARKING, GYM, GATED_SOCIETY, POWER_BACKUP, BALCONY
+
+  @@index([listingId])
 }
 
 model ListingPreference {
@@ -130,6 +148,8 @@ model ListingPreference {
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
   tag         String   // NON_SMOKER, VEGETARIAN, PET_FRIENDLY, WORKING_PROFESSIONAL, CLEAN
+
+  @@index([listingId])
 }
 
 model Conversation {
@@ -146,6 +166,13 @@ model Conversation {
   messages        Message[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  @@index([user1Id])
+  @@index([user2Id])
+  @@index([listingId])
+  @@index([lastMessageAt])
+  @@index([user1Id, lastMessageAt])
+  @@index([user2Id, lastMessageAt])
 }
 
 model Message {
@@ -158,6 +185,11 @@ model Message {
   imageUrl       String?
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([conversationId, createdAt])
+  @@index([conversationId, isRead, senderId])
 }
 
 model SavedListing {
@@ -169,6 +201,8 @@ model SavedListing {
   createdAt DateTime @default(now())
 
   @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
 }
 
 model Report {
@@ -185,6 +219,12 @@ model Report {
   adminNotes     String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@index([reporterId])
+  @@index([reportedUserId])
+  @@index([listingId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model BlockedUser {
@@ -196,6 +236,8 @@ model BlockedUser {
   createdAt DateTime @default(now())
 
   @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
 }
 
 model Notification {
@@ -208,4 +250,8 @@ model Notification {
   type      String   // MESSAGE, LISTING_INQUIRY, EXPIRY_WARNING, SYSTEM
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }

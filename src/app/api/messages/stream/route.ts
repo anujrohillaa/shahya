@@ -8,21 +8,27 @@ export async function GET(req: NextRequest) {
 
   const stream = new ReadableStream({
     start(controller) {
-      // Send initial heartbeat
-      controller.enqueue(encoder.encode(`event: ping\ndata: ${JSON.stringify({ time: Date.now() })}\n\n`));
+      // Send initial connection heartbeat
+      controller.enqueue(
+        encoder.encode(`data: ${JSON.stringify({ type: 'CONNECTED', time: Date.now() })}\n\n`)
+      );
 
       const onMessage = (msg: any) => {
         try {
-          controller.enqueue(encoder.encode(`event: message\ndata: ${JSON.stringify(msg)}\n\n`));
-        } catch (e) {
+          const json = JSON.stringify(msg);
+          // Send both named event and default message for 100% listener compatibility
+          controller.enqueue(encoder.encode(`event: message\ndata: ${json}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${json}\n\n`));
+        } catch {
           // Stream closed
         }
       };
 
       const onNotification = (notif: any) => {
         try {
-          controller.enqueue(encoder.encode(`event: notification\ndata: ${JSON.stringify(notif)}\n\n`));
-        } catch (e) {
+          const json = JSON.stringify(notif);
+          controller.enqueue(encoder.encode(`event: notification\ndata: ${json}\n\n`));
+        } catch {
           // Stream closed
         }
       };
@@ -30,29 +36,32 @@ export async function GET(req: NextRequest) {
       realtimeEmitter.on(RealtimeEvents.NEW_MESSAGE, onMessage);
       realtimeEmitter.on(RealtimeEvents.NEW_NOTIFICATION, onNotification);
 
-      // Heartbeat interval
+      // Heartbeat interval to keep connection alive
       const interval = setInterval(() => {
         try {
-          controller.enqueue(encoder.encode(`event: ping\ndata: ${Date.now()}\n\n`));
-        } catch (e) {
+          controller.enqueue(encoder.encode(`: ping ${Date.now()}\n\n`));
+        } catch {
           clearInterval(interval);
         }
-      }, 25000);
+      }, 15000);
 
       req.signal.addEventListener('abort', () => {
         clearInterval(interval);
         realtimeEmitter.off(RealtimeEvents.NEW_MESSAGE, onMessage);
         realtimeEmitter.off(RealtimeEvents.NEW_NOTIFICATION, onNotification);
-        controller.close();
+        try {
+          controller.close();
+        } catch {}
       });
     },
   });
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
+      'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
     },
   });
 }

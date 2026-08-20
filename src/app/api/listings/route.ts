@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (city && city.toLowerCase() !== 'all') {
-      where.city = { contains: city };
+      where.city = { contains: city, mode: 'insensitive' };
     }
 
     if (gender && gender !== 'ANY') {
@@ -61,11 +61,11 @@ export async function GET(req: NextRequest) {
 
     if (q) {
       where.OR = [
-        { title: { contains: q } },
-        { locality: { contains: q } },
-        { landmark: { contains: q } },
-        { description: { contains: q } },
-        { city: { contains: q } },
+        { title: { contains: q, mode: 'insensitive' } },
+        { locality: { contains: q, mode: 'insensitive' } },
+        { landmark: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { city: { contains: q, mode: 'insensitive' } },
       ];
     }
 
@@ -81,6 +81,7 @@ export async function GET(req: NextRequest) {
     const listings = await prisma.listing.findMany({
       where,
       orderBy,
+      take: 100,
       include: {
         photos: {
           orderBy: { order: 'asc' },

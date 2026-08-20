@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import ReportModal from '@/components/ReportModal';
 import EmojiPicker from '@/components/EmojiPicker';
+import { soundManager } from '@/lib/notificationSound';
 
 export default function ConversationDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -139,15 +140,18 @@ export default function ConversationDetailPage() {
     let eventSource: EventSource | null = null;
     try {
       eventSource = new EventSource('/api/messages/stream');
-      eventSource.addEventListener('message', (event) => {
+
+      const handleIncomingMsg = (rawData: string) => {
         try {
-          const msg = JSON.parse(event.data);
-          if (msg.conversationId === id) {
+          const msg = JSON.parse(rawData);
+          if (msg && msg.conversationId === id && msg.text) {
+            if (msg.senderId !== user?.id) {
+              soundManager.playMessageChime();
+            }
+
             setMessages((prev) => {
-              // 1. If message already exists by ID, do nothing
               if (prev.some((m) => m.id === msg.id)) return prev;
 
-              // 2. If it matches a pending optimistic message from the same sender, replace it
               const tempIdx = prev.findIndex(
                 (m) => m.id.startsWith('temp-') && m.senderId === msg.senderId && m.text === msg.text
               );
@@ -157,19 +161,21 @@ export default function ConversationDetailPage() {
                 return copy;
               }
 
-              // 3. Otherwise append new incoming message
               return [...prev, msg];
             });
-            scrollToBottom();
+            setTimeout(() => scrollToBottom(), 50);
           }
-        } catch (e) {}
-      });
-    } catch (e) {}
+        } catch {}
+      };
+
+      eventSource.onmessage = (e) => handleIncomingMsg(e.data);
+      eventSource.addEventListener('message', (e: any) => handleIncomingMsg(e.data));
+    } catch {}
 
     return () => {
       if (eventSource) eventSource.close();
     };
-  }, [id]);
+  }, [id, user?.id]);
 
   useEffect(() => {
     scrollToBottom('auto');

@@ -35,12 +35,27 @@ export default function MessagesListPage() {
       }
     }
     fetchConversations();
+
+    // SSE Realtime auto-refresh on new message
+    let eventSource: EventSource | null = null;
+    try {
+      eventSource = new EventSource('/api/messages/stream');
+      const refreshList = () => {
+        fetchConversations();
+      };
+      eventSource.onmessage = refreshList;
+      eventSource.addEventListener('message', refreshList);
+    } catch {}
+
+    return () => {
+      if (eventSource) eventSource.close();
+    };
   }, []);
 
   const filtered = conversations.filter(c => 
-    c.otherUser?.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.listing?.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.listing?.locality.toLowerCase().includes(search.toLowerCase())
+    (c.otherUser?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.listing?.title || '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.listing?.locality || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
