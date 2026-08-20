@@ -24,14 +24,14 @@ export default function ImageCropperModal({
   aspectRatio = 16 / 9,
   onCropComplete,
   onCancel,
-  title = 'Crop & Frame Photo'
+  title = 'Crop & Frame Room Photo'
 }: ImageCropperModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageElementRef = useRef<HTMLImageElement>(null);
 
   const [scale, setScale] = useState(1);
-  const [minScale, setMinScale] = useState(1);
-  const [maxScale, setMaxScale] = useState(3);
+  const [minScale, setMinScale] = useState(0.5);
+  const [maxScale, setMaxScale] = useState(4);
 
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -39,17 +39,18 @@ export default function ImageCropperModal({
 
   const [rotation, setRotation] = useState(0);
 
-  const [cropBox, setCropBox] = useState({ width: 0, height: 0 });
-  const [imageSize, setImageSize] = useState({ naturalWidth: 0, naturalHeight: 0 });
+  const [cropBox, setCropBox] = useState({ width: 320, height: 180 });
+  const [imageSize, setImageSize] = useState({ naturalWidth: 800, naturalHeight: 600 });
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Dynamically calculate crop box to perfectly fit container viewport
-  const updateDimensions = useCallback(() => {
+  // Compute crop box dimensions based on container
+  const updateCropDimensions = useCallback(() => {
     if (!containerRef.current) return;
     const containerWidth = containerRef.current.clientWidth;
     const containerHeight = containerRef.current.clientHeight;
 
-    const padX = 24;
-    const padY = 24;
+    const padX = 20;
+    const padY = 20;
     const availWidth = Math.max(containerWidth - padX, 160);
     const availHeight = Math.max(containerHeight - padY, 120);
 
@@ -61,50 +62,46 @@ export default function ImageCropperModal({
       boxWidth = boxHeight * aspectRatio;
     }
 
-    setCropBox({ width: Math.round(boxWidth), height: Math.round(boxHeight) });
+    const finalWidth = Math.round(boxWidth);
+    const finalHeight = Math.round(boxHeight);
+    setCropBox({ width: finalWidth, height: finalHeight });
   }, [aspectRatio]);
 
+  // Window resize handler
   useEffect(() => {
-    updateDimensions();
-    const handleResize = () => updateDimensions();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [updateDimensions]);
+    updateCropDimensions();
+    window.addEventListener('resize', updateCropDimensions);
+    return () => window.removeEventListener('resize', updateCropDimensions);
+  }, [updateCropDimensions]);
 
-  const onImageLoad = () => {
-    if (!imageRef.current) return;
-    const { naturalWidth, naturalHeight } = imageRef.current;
-    setImageSize({ naturalWidth, naturalHeight });
-
-    if (cropBox.width > 0 && cropBox.height > 0) {
-      const scaleX = cropBox.width / naturalWidth;
-      const scaleY = cropBox.height / naturalHeight;
-      const initialCoverScale = Math.max(scaleX, scaleY);
-      setScale(initialCoverScale);
-      setMinScale(initialCoverScale * 0.8);
-      setMaxScale(initialCoverScale * 3.5);
-      setOffset({ x: 0, y: 0 });
-    }
-  };
-
+  // Preload and get real natural image dimensions
   useEffect(() => {
-    if (imageSize.naturalWidth > 0 && cropBox.width > 0) {
-      const isRotated = rotation % 180 !== 0;
-      const effectiveWidth = isRotated ? imageSize.naturalHeight : imageSize.naturalWidth;
-      const effectiveHeight = isRotated ? imageSize.naturalWidth : imageSize.naturalHeight;
+    if (!imageSrc) return;
+    setImageLoaded(false);
 
-      const scaleX = cropBox.width / effectiveWidth;
-      const scaleY = cropBox.height / effectiveHeight;
-      const coverScale = Math.max(scaleX, scaleY);
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.src = imageSrc;
+    img.onload = () => {
+      const nw = img.naturalWidth || 800;
+      const nh = img.naturalHeight || 600;
+      setImageSize({ naturalWidth: nw, naturalHeight: nh });
+      setImageLoaded(true);
 
-      setMinScale(coverScale * 0.7);
-      setMaxScale(coverScale * 4);
-      if (scale < coverScale) {
-        setScale(coverScale);
+      // Compute initial cover scale
+      if (cropBox.width > 0 && cropBox.height > 0) {
+        const scaleX = cropBox.width / nw;
+        const scaleY = cropBox.height / nh;
+        const fitScale = Math.max(scaleX, scaleY);
+        setScale(fitScale);
+        setMinScale(fitScale * 0.6);
+        setMaxScale(fitScale * 4);
+        setOffset({ x: 0, y: 0 });
       }
-    }
-  }, [cropBox, imageSize, rotation]);
+    };
+  }, [imageSrc, cropBox.width, cropBox.height]);
 
+  // Handle pointer dragging
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);
     setDragStart({
@@ -129,6 +126,7 @@ export default function ImageCropperModal({
     } catch (err) {}
   };
 
+  // Wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
@@ -149,10 +147,13 @@ export default function ImageCropperModal({
     }
   };
 
+  // Canvas Crop and Export
   const handleConfirmCrop = () => {
-    if (!imageRef.current || cropBox.width === 0 || cropBox.height === 0) return;
+    if (cropBox.width === 0 || cropBox.height === 0) return;
 
-    const img = imageRef.current;
+    const img = imageElementRef.current;
+    if (!img) return;
+
     const outputWidth = 1200;
     const outputHeight = Math.round(outputWidth / aspectRatio);
 
@@ -174,10 +175,10 @@ export default function ImageCropperModal({
 
     ctx.drawImage(
       img,
-      -img.naturalWidth / 2,
-      -img.naturalHeight / 2,
-      img.naturalWidth,
-      img.naturalHeight
+      -imageSize.naturalWidth / 2,
+      -imageSize.naturalHeight / 2,
+      imageSize.naturalWidth,
+      imageSize.naturalHeight
     );
 
     const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -197,12 +198,13 @@ export default function ImageCropperModal({
             <div>
               <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">{title}</h3>
               <p className="text-[10px] text-slate-400">
-                16:9 Landscape • Drag to position or zoom
+                16:9 Landscape • Drag photo to position or use zoom
               </p>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={onCancel}
             className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
           >
@@ -214,42 +216,35 @@ export default function ImageCropperModal({
         <div
           ref={containerRef}
           onWheel={handleWheel}
-          className="relative flex-1 bg-slate-950 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing min-h-0"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          className="relative flex-1 bg-slate-950 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing min-h-0 select-none"
         >
-          <img
-            ref={imageRef}
-            src={imageSrc}
-            alt="Source"
-            onLoad={onImageLoad}
-            className="hidden"
-          />
-
-          {cropBox.width > 0 && (
-            <div
-              className="absolute pointer-events-none"
-              style={{
-                transform: `translate(${offset.x}px, ${offset.y}px) rotate(${rotation}deg) scale(${scale})`,
-                transformOrigin: 'center center',
-                transition: isDragging ? 'none' : 'transform 0.05s linear',
-              }}
-            >
+          {/* Centered Transformable Image */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+            {imageSrc && (
               <img
+                ref={imageElementRef}
                 src={imageSrc}
+                crossOrigin="anonymous"
                 alt="Crop preview"
-                className="max-w-none pointer-events-none select-none"
+                draggable={false}
                 style={{
+                  transform: `translate(${offset.x}px, ${offset.y}px) rotate(${rotation}deg) scale(${scale})`,
+                  transformOrigin: 'center center',
+                  maxWidth: 'none',
+                  maxHeight: 'none',
                   width: `${imageSize.naturalWidth}px`,
                   height: `${imageSize.naturalHeight}px`,
+                  transition: isDragging ? 'none' : 'transform 0.05s ease-out',
                 }}
-                draggable={false}
+                className="select-none pointer-events-none"
               />
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Darkened Mask & Cutout Box */}
+          {/* Darkened Mask Layer with Cutout Frame */}
           {cropBox.width > 0 && (
             <div
               className="absolute pointer-events-none"
