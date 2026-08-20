@@ -743,7 +743,7 @@ export default function PostListingPage() {
               onClick={() => setStep(5)}
               className="px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm flex items-center gap-2 shadow-md"
             >
-              <span>Next: Photos & Review</span>
+              <span>{intent === 'HAVE_PLACE' ? 'Next: Photos & Review' : 'Next: Review & Publish'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -756,145 +756,165 @@ export default function PostListingPage() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-card space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Photos & Publish</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                {intent === 'HAVE_PLACE' ? 'Photos & Publish' : 'Review & Publish Flatmate Request'}
+              </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Upload clear room photos. Photos are automatically cropped to the recommended 16:9 ratio.
+                {intent === 'HAVE_PLACE'
+                  ? 'Upload clear room photos. Photos are automatically cropped to the recommended 16:9 ratio.'
+                  : 'Review your preferences and target budget before publishing to Shahya.'}
               </p>
             </div>
-            {photos.length > 0 && (
+            {intent === 'HAVE_PLACE' && photos.length > 0 && (
               <span className="text-xs font-bold text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-brand-200">
                 {photos.length} {photos.length === 1 ? 'Photo' : 'Photos'} Added
               </span>
             )}
           </div>
 
-          <div className="space-y-5">
-            {/* Hidden File Input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-
-            {/* 1. Main Upload Dropzone */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                  const fakeEvent = { target: { files: e.dataTransfer.files } } as any;
-                  handleFileSelect(fakeEvent);
-                }
-              }}
-              className="p-8 sm:p-10 border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50/60 hover:bg-brand-50/20 rounded-3xl text-center cursor-pointer transition-all group flex flex-col items-center justify-center space-y-3"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-white shadow-md border border-slate-200/80 flex items-center justify-center text-brand-600 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all">
-                <Upload className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">
-                  <span className="text-brand-600 underline">Click to upload</span> or drag and drop photos
-                </p>
-                <p className="text-xs text-slate-500">
-                  Recommended size: <strong className="text-slate-700">16:9 Landscape</strong> • PNG, JPG, WEBP
-                </p>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
-                <Crop className="w-3.5 h-3.5" />
-                <span>Auto-crops to optimal card size • You can adjust framing</span>
+          {/* Need Place Info Banner */}
+          {intent === 'NEED_PLACE' && (
+            <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-3">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <strong className="block text-emerald-950 font-bold mb-0.5">No Property Photos Required</strong>
+                As a room seeker, you do not need property photos. Hosts and flatmates will see your verified profile, budget, and lifestyle habits to match with you.
               </div>
             </div>
+          )}
 
-            {/* 2. Uploaded Photos Grid */}
-            {photos.length > 0 && (
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Uploaded Photos ({photos.length})
-                  </label>
+          <div className="space-y-5">
+            {/* Photos upload only required / prominent for HAVE_PLACE */}
+            {intent === 'HAVE_PLACE' && (
+              <>
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+                {/* 1. Main Upload Dropzone */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                      const fakeEvent = { target: { files: e.dataTransfer.files } } as any;
+                      handleFileSelect(fakeEvent);
+                    }
+                  }}
+                  className="p-8 sm:p-10 border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50/60 hover:bg-brand-50/20 rounded-3xl text-center cursor-pointer transition-all group flex flex-col items-center justify-center space-y-3"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-white shadow-md border border-slate-200/80 flex items-center justify-center text-brand-600 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">
+                      <span className="text-brand-600 underline">Click to upload</span> or drag and drop photos
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Recommended size: <strong className="text-slate-700">16:9 Landscape</strong> • PNG, JPG, WEBP
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+                    <Crop className="w-3.5 h-3.5" />
+                    <span>Auto-crops to optimal card size • You can adjust framing</span>
+                  </div>
+                </div>
+
+                {/* 2. Uploaded Photos Grid */}
+                {photos.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Uploaded Photos ({photos.length})
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add More</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                      {photos.map((url, idx) => (
+                        <div
+                          key={idx}
+                          className={`relative aspect-[16/9] rounded-2xl overflow-hidden border shadow-xs group bg-slate-900 ${
+                            idx === 0 ? 'ring-2 ring-brand-500 border-brand-500' : 'border-slate-200'
+                          }`}
+                        >
+                          <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                          
+                          {/* Cover Badge */}
+                          {idx === 0 ? (
+                            <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-lg bg-brand-600 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-md">
+                              <Star className="w-3 h-3 fill-white" />
+                              <span>Cover Photo</span>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleSetCoverPhoto(idx)}
+                              className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-slate-900/80 text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-900"
+                            >
+                              Set as Cover
+                            </button>
+                          )}
+
+                          {/* Action buttons */}
+                          <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => handleEditPhotoCrop(idx)}
+                              className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white transition-colors"
+                              title="Re-crop / Adjust Framing"
+                            >
+                              <Crop className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePhoto(idx)}
+                              className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors"
+                              title="Remove Photo"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Optional URL input fallback */}
+                <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Or paste an image web link (https://...)"
+                    value={newPhotoUrl}
+                    onChange={(e) => setNewPhotoUrl(e.target.value)}
+                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  />
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline flex items-center gap-1"
+                    onClick={handleAddPhotoFromUrl}
+                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors whitespace-nowrap"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add More</span>
+                    Add & Crop
                   </button>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                  {photos.map((url, idx) => (
-                    <div
-                      key={idx}
-                      className={`relative aspect-[16/9] rounded-2xl overflow-hidden border shadow-xs group bg-slate-900 ${
-                        idx === 0 ? 'ring-2 ring-brand-500 border-brand-500' : 'border-slate-200'
-                      }`}
-                    >
-                      <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
-                      
-                      {/* Cover Badge */}
-                      {idx === 0 ? (
-                        <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-lg bg-brand-600 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-md">
-                          <Star className="w-3 h-3 fill-white" />
-                          <span>Cover Photo</span>
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleSetCoverPhoto(idx)}
-                          className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-slate-900/80 text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-900"
-                        >
-                          Set as Cover
-                        </button>
-                      )}
-
-                      {/* Action buttons */}
-                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={() => handleEditPhotoCrop(idx)}
-                          className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white transition-colors"
-                          title="Re-crop / Adjust Framing"
-                        >
-                          <Crop className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePhoto(idx)}
-                          className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors"
-                          title="Remove Photo"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </>
             )}
-
-            {/* Optional URL input fallback */}
-            <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Or paste an image web link (https://...)"
-                value={newPhotoUrl}
-                onChange={(e) => setNewPhotoUrl(e.target.value)}
-                className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-              <button
-                type="button"
-                onClick={handleAddPhotoFromUrl}
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors whitespace-nowrap"
-              >
-                Add & Crop
-              </button>
-            </div>
 
             {/* Summary Review Pill */}
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1 mt-4">
