@@ -30,12 +30,12 @@ export default function HomePage() {
   const router = useRouter();
 
   const cities = [
-    { name: 'Gurgaon', count: '480+ places', image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600&auto=format&fit=crop&q=80' },
-    { name: 'Manesar', count: '190+ places', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&fit=crop&q=80' },
-    { name: 'Delhi', count: '410+ places', image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&auto=format&fit=crop&q=80' },
-    { name: 'Noida', count: '290+ places', image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&auto=format&fit=crop&q=80' },
-    { name: 'Bangalore', count: '650+ places', image: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=600&auto=format&fit=crop&q=80' },
-    { name: 'Pune', count: '320+ places', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&fit=crop&q=80' },
+    { name: 'Gurgaon', count: '480+ places', image: '/cities/gurugram.webp' },
+    { name: 'Manesar', count: '190+ places', image: '/cities/manesar.webp' },
+    { name: 'Delhi', count: '410+ places', image: '/cities/delhi.webp' },
+    { name: 'Noida', count: '290+ places', image: '/cities/noida.webp' },
+    { name: 'Bangalore', count: '650+ places', image: '/cities/bangalore.webp' },
+    { name: 'Pune', count: '320+ places', image: '/cities/pune.webp' },
   ];
 
   useEffect(() => {
@@ -253,7 +253,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
           {cities.map((city) => (
             <Link
               key={city.name}
